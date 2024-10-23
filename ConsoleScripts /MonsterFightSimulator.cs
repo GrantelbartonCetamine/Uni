@@ -1,5 +1,4 @@
-
-﻿using System;
+using System;
 
 class MonsterFight()
 {
@@ -7,21 +6,22 @@ class MonsterFight()
 
     class Main()
     {
-        public Ork ork = new Ork(100, 20, "Nahkampf", "Starker Angriif von Oben", 30, "etwas");
-        public Troll troll = new Troll(100, 25, "Nahkampf", "Sehr Starker Angriff", 40, "10% Armor");
-
     }
 
-    public class Ork(int health, int DamageDealing, string type, string SpecialAttackMove, int SpecialAttackDamage, string passive)
+    public class Ork(int health, int DamageDealing, int Abwehpunkte ,float AttackSpeed, int Attack )
     {
+        public int Hp;
+        public int Ap;
+        public int Abwehrpunkte;
+        public float AttackSpeed;
+        public int Attack;
 
-        int Health = health;
-        int Damage = DamageDealing;
-        int SpecialAttackDamage = SpecialAttackDamage;
 
-        string fighttype = type;
-        string SpecialAttackMove = SpecialAttackMove;
-        string passs = passive;
+        this.Hp = health;
+        int Ap = DamageDealing;
+        int Abwehrpunkte = Abwehpunkte;
+        float AttackSpeed = AttackSpeed;
+        int Attack = Attack;
 
         public override string ToString(){
 
@@ -30,17 +30,17 @@ class MonsterFight()
     }
 
 
-    public class Troll(int health, int DamageDealing, string type, string SpecialAttackMove, int SpecialAttackDamage, string passive)
+    public class Troll(int health, int DamageDealing, int Abwehpunkte, float AttackSpeed, int Attack)
     {
-        int Health = health;
-        int Damage = DamageDealing;
-        int SpecialAttackDamage = SpecialAttackDamage;
 
-        string fighttype = type;
-        string SpecialAttackMove = SpecialAttackMove;
-        string passs = passive;
+        int Hp = health;
+        int Ap = DamageDealing;
+        int Abwehrpunkte = Abwehpunkte;
+        float AttackSpeed = AttackSpeed;
+        int Attack = Attack;
 
-        public override string ToString(){
+        public override string ToString()
+        {
 
             return "Troll";
         }
@@ -54,36 +54,56 @@ class GameLogic : MonsterFight
     static void Main()
     {
         StartGame();
+
+    }
+
+    void AssignAttributesOrk()
+    {
+
+        int OrkHealth = GetUserInt("Enter Troll Health : ");
+        var OrkAp = GetUserInt("Enter Troll Ap");
+        var OrklAbwehpunkte = GetUserInt("Enter Troll Abwehrpunkte");
+        float OrkAttackSpeed = GetUserFloat("Enter Troll AttackSpeed : ");
+        var OrkAttack = GetUserInt("Enter Troll Attack Damage");
+        var Ork = new MonsterFight.Ork(OrkHealth, OrkAp, OrklAbwehpunkte, OrkAttackSpeed, OrkAttack);
+    }
+    
+    void AssignAttributesTroll()
+    {
+        int TrollHealth = GetUserInt("Enter Troll Health : ");
+        var TrollAp = GetUserInt("Enter Troll Ap");
+        var TrollAbwehpunkte = GetUserInt("Enter Troll Abwehrpunkte");
+        float TrollAttackSpeed = GetUserFloat("Enter Troll AttackSpeed : ");
+        var TrollAttack = GetUserInt("Enter Troll Attack Damage");
+        var Troll = new MonsterFight.Troll(TrollHealth, TrollAp, TrollAbwehpunkte, TrollAttackSpeed, TrollAttack);
     }
 
     static void StartGame()
     {      
         int classcounter = 0;
 
-        var Ork = new MonsterFight.Ork(100, 20, "Nahkampf", "Starker Angriff von Oben", 30, "etwas");
-        var Troll = new MonsterFight.Troll(100, 25, "Nahkampf", "Sehr starker Angriff", 40, "10% Rüstung");
 
         Console.WriteLine("Choose 2 Charackters");
-        Console.WriteLine($"Available Classes : {Ork}(1) , {Troll}(2)");
+        Console.WriteLine($"Available Classes : {AssignAttributes}(1) , {Troll}(2)");
 
         var userChoice = Console.ReadKey();
 
-        while (classcounter < 1)
+        while (classcounter <= 2)
         { 
         switch(userChoice.KeyChar){
 
             case '1':
-            Console.WriteLine($" You Choose {Ork}");
+            Console.Write($" You Choose {Ork}");
             classcounter ++;
             break;
 
             case '2':
-            Console.WriteLine($" You Choose {Troll}");
+            Console.Write($" You Choose {Troll}");
             classcounter ++;
             break;
             }
 
-            if (classcounter > 1){
+            if (classcounter >= 2){
                 Console.WriteLine("Cannot choose more Charackters");
             }
 
@@ -95,6 +115,23 @@ class GameLogic : MonsterFight
         
     }
 
+    public int GetUserInt(string UserInput)
+    {
+        Console.WriteLine(UserInput);
+        return int.Parse(Console.ReadLine());
+    }
+
+    public float GetUserFloat(string UserInput)
+    {
+        Console.WriteLine(UserInput);
+        return float.Parse(Console.ReadLine());
+    }
+
+
+
+ 
 
 
 }
+
+
