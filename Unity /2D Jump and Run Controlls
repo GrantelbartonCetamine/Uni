@@ -23,8 +23,6 @@ public class player_movement : MonoBehaviour
         HorizontalMovement();
         Jump();
         DobbleJump();
-
-
     }
 
     void HorizontalMovement()
