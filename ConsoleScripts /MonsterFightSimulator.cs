@@ -1,137 +1,280 @@
 using System;
+using static MonsterFight;
 
-class MonsterFight()
+class MonsterFight
 {
-    public bool isdead = false;
-
-    class Main()
-    {
-    }
-
-    public class Ork(int health, int DamageDealing, int Abwehpunkte ,float AttackSpeed, int Attack )
+    public class Ork
     {
         public int Hp;
-        public int Ap;
-        public int Abwehrpunkte;
-        public float AttackSpeed;
-        public int Attack;
+        public int ap;
+        public int abwehrpunkte;
+        public float attackSpeed;
+        public int attack;
+        public int SpecialAbility;
 
-
-        this.Hp = health;
-        int Ap = DamageDealing;
-        int Abwehrpunkte = Abwehpunkte;
-        float AttackSpeed = AttackSpeed;
-        int Attack = Attack;
-
-        public override string ToString(){
-
-            return "Ork";
-        }
-    }
-
-
-    public class Troll(int health, int DamageDealing, int Abwehpunkte, float AttackSpeed, int Attack)
-    {
-
-        int Hp = health;
-        int Ap = DamageDealing;
-        int Abwehrpunkte = Abwehpunkte;
-        float AttackSpeed = AttackSpeed;
-        int Attack = Attack;
-
-        public override string ToString()
+        public Ork(int health, int Ap, int Abwehrpunkte, float AttackSpeed, int Attack, int SpecialAbility)
         {
-
-            return "Troll";
+            Hp = health;
+            ap = Ap;
+            abwehrpunkte = Abwehrpunkte;
+            attackSpeed = AttackSpeed;
+            attack = Attack;
+            SpecialAbility = SpecialAbility;
         }
+
+        public override string ToString() => "Ork";
     }
 
+    public class Troll
+    {
+        public int Hp;
+        public int ap;
+        public int abwehrpunkte;
+        public float attackSpeed;
+        public int attack;
+        public int SpecialAbility;
+
+        public Troll(int health, int Ap, int Abwehrpunkte, float AttackSpeed, int Attack, int SpecialAbility)
+        {
+            Hp = health;
+            ap = Ap;
+            abwehrpunkte = Abwehrpunkte;
+            attackSpeed = AttackSpeed;
+            attack = Attack;
+            SpecialAbility = SpecialAbility;
+        }
+
+        public override string ToString() => "Troll";
+    }
+
+    public class Goblin
+    {
+        public int Hp;
+        public int ap;
+        public int abwehrpunkte;
+        public float attackSpeed;
+        public int attack;
+        public int SpecialAbility;
+
+        public Goblin(int health, int Ap, int Abwehrpunkte, float AttackSpeed, int Attack, int SpecialAbility)
+        {
+            Hp = health;
+            ap = Ap;
+            abwehrpunkte = Abwehrpunkte;
+            attackSpeed = AttackSpeed;
+            attack = Attack;
+            SpecialAbility = SpecialAbility;
+        }
+
+        public override string ToString() => "Goblin";
+    }
+
+    public class Archer
+    {
+        public int Hp;
+        public int ap;
+        public int abwehrpunkte;
+        public float attackSpeed;
+        public int attack;
+        public int SpecialAbility;
+
+        public Archer(int health, int Ap, int Abwehrpunkte, float AttackSpeed, int Attack, int SpecialAbility)
+        {
+            Hp = health;
+            ap = Ap;
+            abwehrpunkte = Abwehrpunkte;
+            attackSpeed = AttackSpeed;
+            attack = Attack;
+            SpecialAbility = SpecialAbility;
+        }
+
+        public override string ToString() => "Archer";
+    }
 }
 
 class GameLogic : MonsterFight
 {
+    private dynamic player1;
+    private dynamic player2;
 
     static void Main()
     {
-        StartGame();
-
+        var gamelogic = new GameLogic();
+        gamelogic.StartGame();
     }
 
-    void AssignAttributesOrk()
+    public void AssignAttributesOrk()
     {
-
-        int OrkHealth = GetUserInt("Enter Troll Health : ");
-        var OrkAp = GetUserInt("Enter Troll Ap");
-        var OrklAbwehpunkte = GetUserInt("Enter Troll Abwehrpunkte");
-        float OrkAttackSpeed = GetUserFloat("Enter Troll AttackSpeed : ");
-        var OrkAttack = GetUserInt("Enter Troll Attack Damage");
-        var Ork = new MonsterFight.Ork(OrkHealth, OrkAp, OrklAbwehpunkte, OrkAttackSpeed, OrkAttack);
+        int OrkHealth = GetUserInt("Enter Ork Health: ");
+        int OrkAp = GetUserInt("Enter Ork Ap: ");
+        int OrkAbwehrpunkte = GetUserInt("Enter Ork Abwehrpunkte: ");
+        float OrkAttackSpeed = GetUserFloat("Enter Ork AttackSpeed: ");
+        int OrkAttack = GetUserInt("Enter Ork Attack Damage: ");
+        int OrkSpecialAbility = GetUserInt("Enter Ork Special Ability Damage: ");
+        player1 = new Ork(OrkHealth, OrkAp, OrkAbwehrpunkte, OrkAttackSpeed, OrkAttack, OrkSpecialAbility);
     }
-    
-    void AssignAttributesTroll()
+
+    public void AssignAttributesTroll()
     {
-        int TrollHealth = GetUserInt("Enter Troll Health : ");
-        var TrollAp = GetUserInt("Enter Troll Ap");
-        var TrollAbwehpunkte = GetUserInt("Enter Troll Abwehrpunkte");
-        float TrollAttackSpeed = GetUserFloat("Enter Troll AttackSpeed : ");
-        var TrollAttack = GetUserInt("Enter Troll Attack Damage");
-        var Troll = new MonsterFight.Troll(TrollHealth, TrollAp, TrollAbwehpunkte, TrollAttackSpeed, TrollAttack);
+        int TrollHealth = GetUserInt("Enter Troll Health: ");
+        int TrollAp = GetUserInt("Enter Troll Ap: ");
+        int TrollAbwehrpunkte = GetUserInt("Enter Troll Abwehrpunkte: ");
+        float TrollAttackSpeed = GetUserFloat("Enter Troll AttackSpeed: ");
+        int TrollAttack = GetUserInt("Enter Troll Attack Damage: ");
+        int TrollSpecialAbility = GetUserInt("Enter Troll Special Ability Damage: ");
+        player1 = new Troll(TrollHealth, TrollAp, TrollAbwehrpunkte, TrollAttackSpeed, TrollAttack, TrollSpecialAbility);
     }
 
-    static void StartGame()
-    {      
-        int classcounter = 0;
+    public void AssignAttributesGoblin()
+    {
+        int GoblinHealth = GetUserInt("Enter Goblin Health: ");
+        int GoblinAp = GetUserInt("Enter Goblin Ap: ");
+        int GoblinAbwehrpunkte = GetUserInt("Enter Goblin Abwehrpunkte: ");
+        float GoblinAttackSpeed = GetUserFloat("Enter Goblin AttackSpeed: ");
+        int GoblinAttack = GetUserInt("Enter Goblin Attack Damage: ");
+        int GoblinSpecialAbility = GetUserInt("Enter Goblin Special Ability Damage: ");
+        player1 = new Goblin(GoblinHealth, GoblinAp, GoblinAbwehrpunkte, GoblinAttackSpeed, GoblinAttack, GoblinSpecialAbility);
+    }
 
+    public void AssignAttributesArcher()
+    {
+        int ArcherHealth = GetUserInt("Enter Archer Health: ");
+        int ArcherAp = GetUserInt("Enter Archer Ap: ");
+        int ArcherAbwehrpunkte = GetUserInt("Enter Archer Abwehrpunkte: ");
+        float ArcherAttackSpeed = GetUserFloat("Enter Archer AttackSpeed: ");
+        int ArcherAttack = GetUserInt("Enter Archer Attack Damage: ");
+        int ArcherSpecialAbility = GetUserInt("Enter Archer Special Ability Damage: ");
+        player1 = new Archer(ArcherHealth, ArcherAp, ArcherAbwehrpunkte, ArcherAttackSpeed, ArcherAttack, ArcherSpecialAbility);
+    }
 
-        Console.WriteLine("Choose 2 Charackters");
-        Console.WriteLine($"Available Classes : {AssignAttributes}(1) , {Troll}(2)");
+    public void StartGame()
+    {
+        Console.WriteLine("Choose your character:");
+        Console.WriteLine("Available Classes: Ork(1), Troll(2), Goblin(3), Archer(4)");
 
-        var userChoice = Console.ReadKey();
+        while (player1 == null)
+        {
+            var userChoice = Console.ReadKey();
+            Console.WriteLine();
 
-        while (classcounter <= 2)
-        { 
-        switch(userChoice.KeyChar){
+            switch (userChoice.KeyChar)
+            {
+                case '1':
+                    Console.WriteLine("You chose Ork.");
+                    AssignAttributesOrk();
+                    break;
 
-            case '1':
-            Console.Write($" You Choose {Ork}");
-            classcounter ++;
-            break;
+                case '2':
+                    Console.WriteLine("You chose Troll.");
+                    AssignAttributesTroll();
+                    break;
 
-            case '2':
-            Console.Write($" You Choose {Troll}");
-            classcounter ++;
-            break;
+                case '3':
+                    Console.WriteLine("You chose Goblin.");
+                    AssignAttributesGoblin();
+                    break;
+
+                case '4':
+                    Console.WriteLine("You chose Archer.");
+                    AssignAttributesArcher();
+                    break;
+
+                default:
+                    Console.WriteLine("Invalid choice, please try again.");
+                    break;
+            }
+        }
+
+        Console.WriteLine("Opponent is a Troll.");
+        player2 = new Troll(100, 10, 5, 1.0f, 15, 25); 
+
+        Fight(player1, player2);
+    }
+
+    static void Fight(dynamic player1, dynamic player2)
+    {
+        Console.WriteLine($"Fight between {player1} and {player2} begins!");
+
+        while (player1.Hp > 0 && player2.Hp > 0)
+        {
+            Console.WriteLine("Choose an action: Attack(1) or Use Special Ability(2)");
+            string userChoice = Console.ReadLine();
+
+            if (userChoice == "1")
+            {
+                int damageToOpponent = player1.attack - player2.abwehrpunkte;
+                damageToOpponent = Math.Max(damageToOpponent, 0);
+
+                Console.WriteLine($"{player1} attacks {player2} and deals {damageToOpponent} damage.");
+                player2.Hp -= damageToOpponent;
+            }
+            else if (userChoice == "2")
+            {
+                int specialDamage = player1.SpecialAbility - player2.abwehrpunkte;
+                specialDamage = Math.Max(specialDamage, 0);
+
+                Console.WriteLine($"{player1} uses their special ability on {player2} and deals {specialDamage} damage.");
+                player2.Hp -= specialDamage;
+            }
+            else
+            {
+                Console.WriteLine("Invalid choice. Please try again.");
+                continue;
             }
 
-            if (classcounter >= 2){
-                Console.WriteLine("Cannot choose more Charackters");
+            Console.WriteLine($"{player2} has {player2.Hp} HP left.");
+
+            if (player2.Hp <= 0)
+            {
+                Console.WriteLine($"{player2} has been defeated! {player1} wins the fight!");
+                break;
             }
 
+            int damageToPlayer = player2.attack - player1.abwehrpunkte;
+            damageToPlayer = Math.Max(damageToPlayer, 0);
+
+            Console.WriteLine($"{player2} attacks {player1} and deals {damageToPlayer} damage.");
+            player1.Hp -= damageToPlayer;
+
+            Console.WriteLine($"{player1} has {player1.Hp} HP left.");
+
+            if (player1.Hp <= 0)
+            {
+                Console.WriteLine($"{player1} has been defeated! {player2} wins the fight!");
+                break;
+            }
         }
     }
-    
-    static void fight(){
 
-        
-    }
-
-    public int GetUserInt(string UserInput)
+    public int GetUserInt(string arg)
     {
-        Console.WriteLine(UserInput);
-        return int.Parse(Console.ReadLine());
+        while (true)
+        {
+            Console.Write(arg);
+            if (int.TryParse(Console.ReadLine(), out int result))
+            {
+                return result;
+            }
+            else
+            {
+                Console.Write("Only numbers are allowed. ");
+            }
+        }
     }
 
-    public float GetUserFloat(string UserInput)
+    public float GetUserFloat(string arg)
     {
-        Console.WriteLine(UserInput);
-        return float.Parse(Console.ReadLine());
+        while (true)
+        {
+            Console.Write(arg);
+            if (float.TryParse(Console.ReadLine(), out float result))
+            {
+                return result;
+            }
+            else
+            {
+                Console.WriteLine("Please enter a valid number.");
+            }
+        }
     }
-
-
-
- 
-
-
 }
-
-
