@@ -69,6 +69,7 @@ class MonsterFight
 class GameLogic : MonsterFight
 {
     Random rnd = new Random();
+    bool run = true;
 
     public MonsterBase player1;
     public MonsterBase player2;
@@ -81,7 +82,7 @@ class GameLogic : MonsterFight
         gamelogic.StartGame();
     }
 
-    public void AssignAttributes()
+    public MonsterBase AssignAttributes(string MonsterType)
     {
         int health = GetUserInt("Enter Health: ");
         int defensepoints = GetUserInt("Enter Ap: ");
@@ -90,31 +91,30 @@ class GameLogic : MonsterFight
         int attack = GetUserInt("Enter Attack Damage: ");
         int specialability = GetUserInt("Enter Special Ability Damage: ");
 
-        switch (userchoice)
+        switch (MonsterType)
         {
-            case '1':
-                player1 = new Ork(health, defensepoints, attackspeed, attack, specialability);
-                break;
+            case "Ork":
+                return new Ork(health, defensepoints, attackspeed, attack, specialability);
 
-            case '2':
-                player1 = new Goblin(health, defensepoints, attackspeed, attack, specialability);
-                break;
+            case "Goblin":
+                return new Goblin(health, defensepoints, attackspeed, attack, specialability);
 
-            case '3':
-                player1 = new Archer(health, defensepoints, attackspeed, attack, specialability);
-                break;
+            case "Archer":
+                return new Archer(health, defensepoints, attackspeed, attack, specialability);
 
-            case '4':
-                player1 = new Troll(health, defensepoints, attackspeed, attack, specialability);
-                break;
+            case "Troll":
+                return new Troll(health, defensepoints, attackspeed, attack, specialability);
+
+            default:
+                throw new ArgumentException("Error");
         }
     }
-
 
     public void StartGame()
     {
         Console.WriteLine("Choose your character:");
         Console.WriteLine("Available Classes: Ork(1), Troll(2), Goblin(3), Archer(4)");
+
 
         while (player1 == null)
         {
@@ -125,37 +125,40 @@ class GameLogic : MonsterFight
             {
                 case '1':
                     Console.WriteLine("You choose Ork.");
-                    AssignAttributes();
+                    player1 = AssignAttributes("Ork");
                     break;
 
                 case '2':
                     Console.WriteLine("You chose Troll.");
-                    AssignAttributes();
+                    player1 = AssignAttributes("Troll");
                     break;
 
                 case '3':
                     Console.WriteLine("You chose Goblin.");
-                    AssignAttributes();
+                    player1 = AssignAttributes("Goblin");
                     break;
 
                 case '4':
                     Console.WriteLine("You chose Archer.");
-                    AssignAttributes();
+                    player1 = AssignAttributes("Archer");
                     break;
 
                 default:
                     Console.WriteLine("Invalid choice, please try again.");
-                    break;
+                    continue;
+            }
+
+            if (player1 != null)
+            {
+                break;
             }
         }
-
-        Console.WriteLine("Opponent is a Troll.");
         player2 = RandomOponent();
+
+        Console.WriteLine($"Youre Opponent is {player2}");
 
         Fight(player1, player2);
     }
-
-
 
     public MonsterBase RandomOponent()
     {
@@ -170,20 +173,20 @@ class GameLogic : MonsterFight
         return opponents[choice];
     }
 
-    static void Fight(MonsterBase player1 , MonsterBase player2)
+    static void Fight(MonsterBase player1, MonsterBase player2)
     {
         Console.WriteLine($"Fight between {player1} and {player2} begins!");
-        
+
         while (player1.HealthPoints > 1 || player2.HealthPoints > 1)
         {
             Console.WriteLine("Choose an action: Attack(1) or Use Special Ability(2)");
             string userChoice = Console.ReadLine();
-        
+
             if (userChoice == "1")
             {
                 int damageToOpponent = player1.Attack - player2.DefensePoints;
                 damageToOpponent = Math.Max(damageToOpponent, 0);
-        
+
                 Console.WriteLine($"{player1} attacks {player2} and deals {damageToOpponent} damage to {player2}.");
                 player2.HealthPoints -= damageToOpponent;
             }
@@ -191,7 +194,7 @@ class GameLogic : MonsterFight
             {
                 int specialDamage = player1.SpecialAbility - player2.DefensePoints;
                 specialDamage = Math.Max(specialDamage, 0);
-        
+
                 Console.WriteLine($"{player1} uses their special ability on {player2} and deals {specialDamage} damage.");
                 player2.HealthPoints -= specialDamage;
             }
@@ -200,23 +203,23 @@ class GameLogic : MonsterFight
                 Console.WriteLine("Invalid choice. Please try again.");
                 continue;
             }
-        
+
             Console.WriteLine($"{player2} has {player2.HealthPoints} HP left.");
-        
+
             if (player2.HealthPoints <= 0)
             {
                 Console.WriteLine($"{player2} has been defeated! {player1} wins the fight!");
                 break;
             }
-        
+
             int damageToPlayer = player2.Attack - player1.DefensePoints;
             damageToPlayer = Math.Max(damageToPlayer, 0);
-        
+
             Console.WriteLine($"{player2} attacks {player1} and deals {damageToPlayer} damage.");
             player1.HealthPoints -= damageToPlayer;
-        
+
             Console.WriteLine($"{player1} has {player1.HealthPoints} HP left.");
-        
+
             if (player1.HealthPoints <= 0)
             {
                 Console.WriteLine($"{player1} has been defeated! {player2} wins the fight!");
