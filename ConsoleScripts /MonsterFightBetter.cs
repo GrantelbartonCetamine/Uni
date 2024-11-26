@@ -32,6 +32,7 @@ class MonsterFight
         {
 
         }
+        public override string ToString() => "Ork";
     }
 
     public class Goblin : MonsterBase
@@ -41,6 +42,7 @@ class MonsterFight
         {
 
         }
+        public override string ToString() => "Goblin";
 
     }
 
@@ -51,6 +53,7 @@ class MonsterFight
         {
 
         }
+        public override string ToString() => "Archer";
 
     }
 
@@ -61,6 +64,7 @@ class MonsterFight
         {
 
         }
+        public override string ToString() => "Troll";
 
     }
 }
@@ -173,30 +177,45 @@ class GameLogic : MonsterFight
         return opponents[choice];
     }
 
-    static void Fight(MonsterBase player1, MonsterBase player2)
+    public int HandleFightDamage(MonsterBase attacker, MonsterBase target)
+    {
+
+        int baseDamage = attacker.Attack - target.DefensePoints;
+
+
+        if (baseDamage <= 0)
+        {
+            baseDamage = 1;
+        }
+
+
+        int totalDamage = baseDamage + attacker.SpecialAbility;
+
+        if (totalDamage <= 0)
+        {
+            totalDamage = 1;
+        }
+
+        return totalDamage;
+    }
+
+    public void Fight(MonsterBase player1, MonsterBase player2)
     {
         Console.WriteLine($"Fight between {player1} and {player2} begins!");
 
-        while (player1.HealthPoints > 1 || player2.HealthPoints > 1)
+        while (player1.HealthPoints > 0 && player2.HealthPoints > 0)
         {
             Console.WriteLine("Choose an action: Attack(1) or Use Special Ability(2)");
             string userChoice = Console.ReadLine();
 
+            int damage = 0;
             if (userChoice == "1")
             {
-                int damageToOpponent = player1.Attack - player2.DefensePoints;
-                damageToOpponent = Math.Max(damageToOpponent, 0);
-
-                Console.WriteLine($"{player1} attacks {player2} and deals {damageToOpponent} damage to {player2}.");
-                player2.HealthPoints -= damageToOpponent;
+                damage = HandleFightDamage(player1, player2); 
             }
             else if (userChoice == "2")
             {
-                int specialDamage = player1.SpecialAbility - player2.DefensePoints;
-                specialDamage = Math.Max(specialDamage, 0);
-
-                Console.WriteLine($"{player1} uses their special ability on {player2} and deals {specialDamage} damage.");
-                player2.HealthPoints -= specialDamage;
+                damage = HandleFightDamage(player1, player2); 
             }
             else
             {
@@ -204,7 +223,8 @@ class GameLogic : MonsterFight
                 continue;
             }
 
-            Console.WriteLine($"{player2} has {player2.HealthPoints} HP left.");
+            player2.HealthPoints -= damage;
+            Console.WriteLine($"{player1} attacks {player2} and deals {damage} damage.");
 
             if (player2.HealthPoints <= 0)
             {
@@ -212,19 +232,23 @@ class GameLogic : MonsterFight
                 break;
             }
 
-            int damageToPlayer = player2.Attack - player1.DefensePoints;
-            damageToPlayer = Math.Max(damageToPlayer, 0);
+            Console.WriteLine($"{player2} has {player2.HealthPoints} HP left.");
 
-            Console.WriteLine($"{player2} attacks {player1} and deals {damageToPlayer} damage.");
-            player1.HealthPoints -= damageToPlayer;
+            // Der Gegner greift an
 
-            Console.WriteLine($"{player1} has {player1.HealthPoints} HP left.");
+            damage = HandleFightDamage(player2, player1);
+
+            player1.HealthPoints -= damage;
+
+            Console.WriteLine($"{player2} attacks {player1} and deals {damage} damage.");
 
             if (player1.HealthPoints <= 0)
             {
                 Console.WriteLine($"{player1} has been defeated! {player2} wins the fight!");
-                break;
+                Environment.Exit(0);
             }
+
+            Console.WriteLine($"{player1} has {player1.HealthPoints} HP left.");
         }
     }
 
