@@ -3,14 +3,13 @@ using System.Collections.Generic;
 
 class SortierAlgorhytmen
 {
-    List<int> Numbers = new List<int> { 10 };
-
     static void Main()
     {
-        RandomNumbers();
+        InitializeRandomNumbers();
+        AscendingAlgo();
     }
 
-    static void RandomNumbers()
+    static List<int> InitializeRandomNumbers()
     {
 
         List<int> Numbers = new List<int>();
@@ -22,7 +21,7 @@ class SortierAlgorhytmen
             if (UserInput == null)
             {
                 Console.WriteLine("Please Enter a Valid Number");
-                return;
+                continue;
             }
             else if (int.TryParse(UserInput, out int numbers))
             {
@@ -36,10 +35,32 @@ class SortierAlgorhytmen
                 }
             }
         }
+        return Numbers;
+    }
+
+    static void AscendingAlgo(List<int> MyList)
+    {   
+
+
+        do 
+        for (int i = 0 ; i < MyList.Count - 1; i++)
+        {
+            for (int a = 0; a < MyList.Count - i; a++)
+            {
+                if (MyList[a] > MyList[a + 1])
+                {
+                    int PlaceHolder = MyList[a];
+                    MyList[a] = MyList[j + 1];
+                    MyList[j + 1] = PlaceHolder;
+
+                }
+            }
+        }while (true);
 
     }
 
 }
+
 
 
 
