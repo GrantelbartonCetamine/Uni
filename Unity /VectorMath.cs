@@ -1,6 +1,7 @@
-using UnityEngine;
+using System;
+using System.Numerics;
 
-public class VectorMath : MonoBehaviour
+class VectorMath
 {
 
     Vector3 StructVectorX;
@@ -19,53 +20,56 @@ public class VectorMath : MonoBehaviour
     Vector3 Distance2VectorX;
     Vector3 Distance2VectorY;
 
-
-    void Start()
+    static void Main()
     {
-    }
-
-
-    void Update()
-    {
-        FloatAttributtes();
-        StructOnZero();
-        InitializeParameters(out StructVectorX, out StructVectorY, out StructVectorZ);
-        Plus(PlusVectorX , PlusVectorY);
-        Minus(MinusVectorX , MinusVectorY);
-        Distance(DistanceVectorX, DistanceVectorY);
+        VectorMath MathVectors = new VectorMath();
+        MathVectors.FloatAttributtes();
+        MathVectors.StructOnZero();
+        MathVectors.InitializeParameters();
+        MathVectors.Plus();
+        MathVectors.Minus();
+        MathVectors.Distance2();
+        Distance();
 
     }
 
     private void FloatAttributtes() // Drei float Attribute/Felder: x, y, z
     {
         Vector3 TimeStepOffset = new Vector3(1f, 2f, 3f);
+
+        Console.WriteLine($" In Function FloatAttributtes  \nVector with 3 Float Attributes : {TimeStepOffset} \n");
     }
 
     private void StructOnZero() //  Standardkonstruktor in dem x, y, z auf 0 gesetzt werden 
 
     {
-        Vector3 vector = Vector3.zero;
+        Vector3 vector = new Vector3(0, 0, 0);
+
+        Console.WriteLine($"In Function StructOnZero  \n Vector3 with all Axes on Zero : {vector}\n");
     }
 
-    private void InitializeParameters(out Vector3 X, out Vector3 Y, out Vector3 Z) //  Einen Konstruktor in dem x, y, z mit Parametern initialisiert werden
+    private void InitializeParameters() //  Einen Konstruktor in dem x, y, z mit Parametern initialisiert werden
     {
-        X = new Vector3(1f, 0, 0);
-        Y = new Vector3(0, 2f, 0);
-        Z = new Vector3(0, 0, 3f);
+        StructVectorX = new Vector3(1f, 0, 0);
+        StructVectorY = new Vector3(0, 2f, 0);
+        StructVectorZ = new Vector3(0, 0, 3f);
 
-        Debug.Log($"X Vector : {X} , Y Vector {Y} , Z Vector : {Z}");
+        Console.WriteLine($"In Function InitializeParameters  \n X Vector : {StructVectorX} ,\n Y Vector : {StructVectorY} ,\n Z Vector : {StructVectorZ}\n");
     }
 
-    private void Plus(Vector3 PlusVectorX,Vector3 PlusVectorY)  //  + Operator für die Addition mit einem anderen Vektor
+    private void Plus()  //  + Operator für die Addition mit einem anderen Vektor
     {
+
+        PlusVectorX = new Vector3(33, 35, 94);
+        PlusVectorY = new Vector3(12 ,364 , 63);
 
         Vector3 result = PlusVectorX + PlusVectorY;
 
-        Debug.Log($"Result of Plus Operation is {result}");
+        Console.WriteLine($"In Function Plus with  PlusVectorX {PlusVectorX} + PlusVectorY {PlusVectorY} the  result is :  \n{result}\n");
 
     }
 
-    void Minus(Vector3 MinusVectorX,Vector3 MinusVectorY) //  - Operator für die Substraktion mit einem anderen Vektor
+    void Minus() //  - Operator für die Substraktion mit einem anderen Vektor
     {
 
         MinusVectorX = new Vector3(1, 5, 8);
@@ -73,28 +77,31 @@ public class VectorMath : MonoBehaviour
 
         Vector3 Result = MinusVectorX - MinusVectorY;
 
-        Debug.Log($"Result of Minus Operation is {Result}");
+        Console.WriteLine($"In Function Minus : Vector MinusVectorX {MinusVectorX} - MinusVectorY {MinusVectorY} is: {Result}\n ");
+
     }
 
-    static float Distance(Vector3 DistanceVectorX , Vector3 DistanceVectorY)  // Methode die die Distanz zwischen zwei Vektoren/Punkten berechnet und als float zurückgeben.
-                                                                             // Implementiere diese Methode in einer statischen und nicht-statischen Version
+    static float Distance()  // Methode die die Distanz zwischen zwei Vektoren/Punkten berechnet und als float zurückgeben.
+                            // Implementiere diese Methode in einer statischen und nicht-statischen Version
     {
-        DistanceVectorX = new Vector3(2, 5, 10);
-        DistanceVectorY = new Vector3(9, 4, 7);
-            
-        float Result = Vector3.Distance(DistanceVectorX , DistanceVectorY);
+        Vector3 DistanceVectorX = new Vector3(2f, 5f, 10f);
+        Vector3 DistanceVectorY = new Vector3(9f, 4f, 7f);
+
+        float Result = Vector3.Distance(DistanceVectorX, DistanceVectorY);
+
+        Console.WriteLine($"In Function Distance the Distance Between Vector X {DistanceVectorX} and Y {DistanceVectorY} is {Result}\n");
 
         return Result;
     }
 
-    float Distance2(Vector3 Distance2VectorX , Vector3 Distance2VectorY)
+    float Distance2()
     {
-        Distance2VectorX = new Vector3(2, 5, 8);
-        Distance2VectorY = new Vector3(9, 4, 10);
+        Distance2VectorX = new Vector3(2f, 5f, 8f);
+        Distance2VectorY = new Vector3(9f, 4f, 10f);
 
         float Result = Vector3.Distance(Distance2VectorX, Distance2VectorY);
 
-        Debug.Log($"Distance Between VectorX and VectorY is {Result}");
+        Console.WriteLine($"In Function Distance2 the Distance Between Vector X and Y is {Result}\n");
 
         return Result;
 
@@ -102,7 +109,4 @@ public class VectorMath : MonoBehaviour
 
     }
 
-
-
 }
-
