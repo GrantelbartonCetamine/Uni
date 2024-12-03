@@ -13,19 +13,26 @@ public class VectorMath : MonoBehaviour
     Vector3 MinusVectorX;
     Vector3 MinusVectorY;
 
+    Vector3 DistanceVectorX;
+    Vector3 DistanceVectorY;
+
+    Vector3 Distance2VectorX;
+    Vector3 Distance2VectorY;
+
 
     void Start()
+    {
+    }
+
+
+    void Update()
     {
         FloatAttributtes();
         StructOnZero();
         InitializeParameters(out StructVectorX, out StructVectorY, out StructVectorZ);
         Plus(PlusVectorX , PlusVectorY);
         Minus(MinusVectorX , MinusVectorY);
-    }
-
-
-    void Update()
-    {
+        Distance(DistanceVectorX, DistanceVectorY);
 
     }
 
@@ -68,6 +75,34 @@ public class VectorMath : MonoBehaviour
 
         Debug.Log($"Result of Minus Operation is {Result}");
     }
+
+    static float Distance(Vector3 DistanceVectorX , Vector3 DistanceVectorY)  // Methode die die Distanz zwischen zwei Vektoren/Punkten berechnet und als float zurückgeben.
+                                                                             // Implementiere diese Methode in einer statischen und nicht-statischen Version
+    {
+        DistanceVectorX = new Vector3(2, 5, 10);
+        DistanceVectorY = new Vector3(9, 4, 7);
+            
+        float Result = Vector3.Distance(DistanceVectorX , DistanceVectorY);
+
+        return Result;
+    }
+
+    float Distance2(Vector3 Distance2VectorX , Vector3 Distance2VectorY)
+    {
+        Distance2VectorX = new Vector3(2, 5, 8);
+        Distance2VectorY = new Vector3(9, 4, 10);
+
+        float Result = Vector3.Distance(Distance2VectorX, Distance2VectorY);
+
+        Debug.Log($"Distance Between VectorX and VectorY is {Result}");
+
+        return Result;
+
+
+
+    }
+
+
 
 }
 
