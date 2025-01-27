@@ -1,116 +1,284 @@
 using System;
-using System.Collections.Generic;
-using static System.Net.Mime.MediaTypeNames;
-using System.Reflection;
-using System.Collections;
 
-class SortierAlgorhytmen
+
+class MonsterFight
 {
+    public class MonsterBase
+    {
+        public int HealthPoints { get; set; }
+        public int DefensePoints { get; set; }
+        public float AttackSpeed { get; set; }
+        public int Attack { get; set; }
+        public int SpecialAbility { get; set; }
+
+        public MonsterBase(int health, int defensepoints, float attackspeed, int attack, int specialability)
+        {
+
+            HealthPoints = health;
+            DefensePoints = defensepoints;
+            AttackSpeed = attackspeed;
+            Attack = attack;
+            SpecialAbility = specialability;
+
+        }
+
+        public override string ToString() => "Monster";
+    }
+
+    public class Ork : MonsterBase
+    {
+        public Ork(int health, int defensepoints, float attackspeed, int attack, int specialability)
+            : base(health, defensepoints, attackspeed, attack, specialability)
+        {
+
+        }
+        public override string ToString() => "Ork";
+    }
+
+    public class Goblin : MonsterBase
+    {
+        public Goblin(int health, int defensepoints, float attackspeed, int attack, int specialability)
+            : base(health, defensepoints, attackspeed, attack, specialability)
+        {
+
+        }
+        public override string ToString() => "Goblin";
+
+    }
+
+    public class Archer : MonsterBase
+    {
+        public Archer(int health, int defensepoints, float attackspeed, int attack, int specialability)
+            : base(health, defensepoints, attackspeed, attack, specialability)
+        {
+
+        }
+        public override string ToString() => "Archer";
+
+    }
+
+    public class Troll : MonsterBase
+    {
+        public Troll(int health, int defensepoints, float attackspeed, int attack, int specialability)
+            : base(health, defensepoints, attackspeed, attack, specialability)
+        {
+
+        }
+        public override string ToString() => "Troll";
+
+    }
+}
+
+
+class GameLogic : MonsterFight
+{
+    Random rnd = new Random();
+    bool run = true;
+
+    public MonsterBase player1;
+    public MonsterBase player2;
+
+    public char userchoice { get; set; }
 
     static void Main()
     {
-        List<int> numbers = InitializeRandomNumbers();
-        Decide(numbers);
+        var gamelogic = new GameLogic();
+        gamelogic.StartGame();
     }
 
-    static List<int> InitializeRandomNumbers()   // Give a list with Inputet Numbers Back
+    public MonsterBase AssignAttributes(string MonsterType)
     {
-        List<int> Numbers = new List<int>();
-        Console.WriteLine("Enter numbers (type 'exit' to finish):");
+        int health = GetUserInt("Enter Health: ");
+        int defensepoints = GetUserInt("Enter Ap: ");
+        int attackspeed = GetUserInt("Enter Abwehrpunkte: ");
+        float attackSpeed = GetUserFloat("Enter AttackSpeed: ");
+        int attack = GetUserInt("Enter Attack Damage: ");
+        int specialability = GetUserInt("Enter Special Ability Damage: ");
 
-        while (true)
+        switch (MonsterType)
         {
-            string UserInput = Console.ReadLine();
-            if (UserInput.ToLower() == "exit")
+            case "Ork":
+                return new Ork(health, defensepoints, attackspeed, attack, specialability);
+
+            case "Goblin":
+                return new Goblin(health, defensepoints, attackspeed, attack, specialability);
+
+            case "Archer":
+                return new Archer(health, defensepoints, attackspeed, attack, specialability);
+
+            case "Troll":
+                return new Troll(health, defensepoints, attackspeed, attack, specialability);
+
+            default:
+                throw new ArgumentException("Error");
+        }
+    }
+
+    public void StartGame()
+    {
+        Console.WriteLine("Choose your character:");
+        Console.WriteLine("Available Classes: Ork(1), Troll(2), Goblin(3), Archer(4)");
+
+
+        while (player1 == null)
+        {
+            var userChoice = Console.ReadKey();
+            Console.WriteLine();
+
+            switch (userChoice.KeyChar)
+            {
+                case '1':
+                    Console.WriteLine("You choose Ork.");
+                    player1 = AssignAttributes("Ork");
+                    break;
+
+                case '2':
+                    Console.WriteLine("You chose Troll.");
+                    player1 = AssignAttributes("Troll");
+                    break;
+
+                case '3':
+                    Console.WriteLine("You chose Goblin.");
+                    player1 = AssignAttributes("Goblin");
+                    break;
+
+                case '4':
+                    Console.WriteLine("You chose Archer.");
+                    player1 = AssignAttributes("Archer");
+                    break;
+
+                default:
+                    Console.WriteLine("Invalid choice, please try again.");
+                    continue;
+            }
+
+            if (player1 != null)
             {
                 break;
             }
-            else if (int.TryParse(UserInput, out int number))
+        }
+        player2 = RandomOponent();
+
+        Console.WriteLine($"Youre Opponent is {player2}");
+
+        Fight(player1, player2);
+    }
+
+    public MonsterBase RandomOponent()
+    {
+        var opponents = new List<MonsterBase>()
             {
-                Numbers.Add(number);
-                Console.WriteLine($"Added number {number} to the list.");
+                new Ork(100, 100, 5, 25, 10),                                                                     
+                new Archer(100, 100, 40, 15, 5),      
+                new Troll(100, 100, 5, 11 , 11)        
+            };
+        int choice = rnd.Next(opponents.Count);
+
+        return opponents[choice];
+    }
+
+    public int HandleFightDamage(MonsterBase attacker, MonsterBase target)
+    {
+
+        int baseDamage = attacker.Attack - target.DefensePoints;
+
+
+        if (baseDamage <= 0)
+        {
+            baseDamage = 0;
+        }
+
+
+        int totalDamage = baseDamage + attacker.SpecialAbility;
+
+        if (totalDamage <= 0)
+        {
+            totalDamage = 0;
+        }
+
+        return totalDamage;
+    }
+
+    public void Fight(MonsterBase player1, MonsterBase player2)
+    {
+        Console.WriteLine($"Fight between {player1} and {player2} begins!");
+
+        while (player1.HealthPoints > 0 && player2.HealthPoints > 0)
+        {
+            Console.WriteLine("Choose an action: Attack(1) or Use Special Ability(2)");
+            string userChoice = Console.ReadLine();
+
+            int damage = 0;
+            if (userChoice == "1")
+            {
+                damage = HandleFightDamage(player1, player2);
+            }
+            else if (userChoice == "2")
+            {
+                damage = HandleFightDamage(player1, player2);
+            }
+            else
+            {
+                Console.WriteLine("Invalid choice. Please try again.");
+                continue;
+            }
+
+            player2.HealthPoints -= damage;
+            Console.WriteLine($"{player1} attacks {player2} and deals {damage} damage.");
+
+            if (player2.HealthPoints <= 0)
+            {
+                Console.WriteLine($"{player2} has been defeated! {player1} wins the fight!");
+                break;
+            }
+
+            Console.WriteLine($"{player2} has {player2.HealthPoints} HP left.");
+
+            damage = HandleFightDamage(player2, player1);
+
+            player1.HealthPoints -= damage;
+
+            Console.WriteLine($"{player2} attacks {player1} and deals {damage} damage.");
+
+            if (player1.HealthPoints <= 0)
+            {
+                Console.WriteLine($"{player1} has been defeated! {player2} wins the fight!");
+                Environment.Exit(0);
+            }
+
+            Console.WriteLine($"{player1} has {player1.HealthPoints} HP left.");
+        }
+    }
+
+    public int GetUserInt(string arg)
+    {
+        while (true)
+        {
+            Console.Write(arg);
+            if (int.TryParse(Console.ReadLine(), out int result))
+            {
+                return result;
+            }
+            else
+            {
+                Console.Write("Only numbers are allowed. ");
+            }
+        }
+    }
+
+    public float GetUserFloat(string arg)
+    {
+        while (true)
+        {
+            Console.Write(arg);
+            if (float.TryParse(Console.ReadLine(), out float result))
+            {
+                return result;
             }
             else
             {
                 Console.WriteLine("Please enter a valid number.");
             }
-        }
-        return Numbers;
-    }
-
-    static void BubbleGum(List<int> MyList)
-    {
-        bool isSorted;
-        do
-        {
-            isSorted = true;
-            for (int i = 0; i < MyList.Count - 1; i++)
-            {
-                if (MyList[i] > MyList[i + 1]) // checks if the next index is bigger then my current index
-                {
-                    int PlaceHolder = MyList[i];
-                    MyList[i] = MyList[i + 1]; // checks if the next index is bigger then my current index
-                    MyList[i + 1] = PlaceHolder; // 
-                    isSorted = false;
-                }
-            }
-        } while (!isSorted);
-    }
-
-
-    static void QuickSortAlgo(List<int> list, int low, int high)
-    {
-        if (low < high)
-        {
-            int index = Decision(list, low, high);
-            QuickSortAlgo(list, low, index - 1);
-            QuickSortAlgo(list, index + 1, high);
-
-        }
-    }
-
-    static int Decision(List<int> list, int low, int high)
-    {
-        int boundary = list[high];
-        int i = low - 1;
-
-        for (int j = low; j < high; j++)
-        {
-
-            if (list[j] <= boundary)
-            {
-                i++;
-                int placeholder = list[i];
-                list[i] = list[j];
-                list[j] = placeholder;
-            }
-        }
-        int temp = list[i + 1];
-        list[i + 1] = list[high];
-        list[high] = temp;
-        return i + 1;
-
-
-    }
-
-    static void Decide(List<int> numbers)
-    {
-
-        Console.WriteLine("Choose between an Algorithm (1 for BubbleGum, 2 for QuickSort):");
-        string userinput = Console.ReadLine();
-        if (userinput == "1")
-        {
-            BubbleGum(numbers);
-        }
-        else if (userinput == "2")
-
-        {
-            QuickSortAlgo(numbers, 0, numbers.Count - 1);
-        }
-
-        foreach (var num in numbers)
-        {
-            Console.WriteLine(num);
         }
     }
 }
