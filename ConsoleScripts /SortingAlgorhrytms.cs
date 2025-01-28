@@ -13,15 +13,15 @@ class SortierAlgorhytmen
         Decide(numbers);
     }
 
-    static List<int> InitializeRandomNumbers()   
+    static List<int> InitializeRandomNumbers()
     {
         List<int> Numbers = new List<int>();
-        Console.WriteLine("Enter numbers (type 'exit' to finish):");
+        Console.WriteLine("Enter numbers (type 'Next' to finish):");
 
         while (true)
         {
             string UserInput = Console.ReadLine();
-            if (UserInput.ToLower() == "exit")
+            if (UserInput.ToLower() == "next")
             {
                 break;
             }
@@ -46,11 +46,11 @@ class SortierAlgorhytmen
             isSorted = true;
             for (int i = 0; i < MyList.Count - 1; i++)
             {
-                if (MyList[i] > MyList[i + 1]) 
+                if (MyList[i] > MyList[i + 1])
                 {
                     int PlaceHolder = MyList[i];
-                    MyList[i] = MyList[i + 1]; 
-                    MyList[i + 1] = PlaceHolder; 
+                    MyList[i] = MyList[i + 1];
+                    MyList[i + 1] = PlaceHolder;
                     isSorted = false;
                 }
             }
@@ -93,10 +93,60 @@ class SortierAlgorhytmen
 
     }
 
+    static List<int> MergeSort(List<int> list)
+    {
+        if (list.Count <= 1)
+            return list;
+
+        int midSort = list.Count / 2;
+        List<int> left = list.GetRange(0, midSort);
+        List<int> right = list.GetRange(midSort, list.Count - midSort);
+
+        left = MergeSort(left);
+        right = MergeSort(right);
+
+        return Merging(left, right);
+
+    }
+    static List<int> Merging(List<int> left, List<int> right)
+    {
+        List<int> result = new List<int>();
+        int i = 0, j = 0;
+
+        while (i < left.Count && j < right.Count)
+        {
+            if (left[i] < right[j])
+            {
+                result.Add(left[i]);
+                i++;
+            }
+            else
+            {
+                result.Add(right[j]);
+                i++;
+            }
+        }
+
+        while (i < left.Count)
+        {
+            result.Add(left[i]);
+            i++;
+        }
+
+        while (i < right.Count)
+        {
+            result.Add(right[j]);
+            i++;
+        }
+
+        return result;
+    }
+
+
     static void Decide(List<int> numbers)
     {
 
-        Console.WriteLine("Choose between an Algorithm (1 for BubbleGum, 2 for QuickSort):");
+        Console.WriteLine("Choose between an Algorithm (1 for BubbleGum , 2 for QuickSort , 3 for MergeSort):");
         string userinput = Console.ReadLine();
         if (userinput == "1")
         {
@@ -106,6 +156,14 @@ class SortierAlgorhytmen
 
         {
             QuickSortAlgo(numbers, 0, numbers.Count - 1);
+        }
+
+        else if (userinput == "3")
+
+        {
+            List<int> sortedNumbers = MergeSort(numbers); 
+            numbers.Clear(); 
+            numbers.AddRange(sortedNumbers); 
         }
 
         foreach (var num in numbers)
