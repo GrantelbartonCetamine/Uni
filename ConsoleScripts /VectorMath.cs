@@ -1,3 +1,4 @@
+
 using System;
 using System.Numerics;
 
@@ -38,14 +39,14 @@ class VectorMath
 
     }
 
-    private void FloatAttributtes() 
+    private void FloatAttributtes()
     {
         Vector3 TimeStepOffset = new Vector3(1f, 2f, 3f);
 
         Console.WriteLine($" In Function FloatAttributtes  \nVector with 3 Float Attributes : {TimeStepOffset} \n");
     }
 
-    private void StructOnZero() 
+    private void StructOnZero()
 
     {
         Vector3 vector = new Vector3(0, 0, 0);
@@ -53,25 +54,24 @@ class VectorMath
         Console.WriteLine($"In Function StructOnZero  \n Vector3 with all Axes on Zero : {vector}\n");
     }
 
-    private void InitializeParameters() 
+    private void InitializeParameters(Vector3 X , Vector3 Y)
     {
-        StructVectorX = new Vector3(1f, 0, 0);
-        StructVectorY = new Vector3(0, 2f, 0);
-        StructVectorZ = new Vector3(0, 0, 3f);
+        X = new Vector3(1f, 3f, 5f);
+        Y = new Vector3(10f, 30f, 50f);
+        Z = new Vector3(100f, 300f, 500f);
 
-        Console.WriteLine($"In Function InitializeParameters  \n X Vector : {StructVectorX} ,\n Y Vector : {StructVectorY} ,\n Z Vector : {StructVectorZ}\n");
+        Console.WriteLine($"In Function InitializeParameters  \n X Vector : {X} ,\n Y Vector : {StructVectorY} ,\n Z Vector : {StructVectorZ}\n");
+
     }
 
-    private void Plus() 
+    private void Plus()
     {
-
         PlusVectorX = new Vector3(33, 35, 94);
         PlusVectorY = new Vector3(12, 364, 63);
 
         Vector3 result = PlusVectorX + PlusVectorY;
 
         Console.WriteLine($"In Function Plus with  PlusVectorX {PlusVectorX} + PlusVectorY {PlusVectorY} the  result is :  \n{result}\n");
-
     }
 
     void Minus()
@@ -120,7 +120,7 @@ class VectorMath
         float lenghty = LenghtVectorY.Length();
 
         Console.WriteLine($"In Function Lenght the Lenght of LenghtVectorX is {lenghtX} and Lenght of LenghtVectorY is : {lenghty}");
-        return (lenghtX +  lenghty);
+        return (lenghtX + lenghty);
 
     }
 
