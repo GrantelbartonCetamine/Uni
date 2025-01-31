@@ -26,10 +26,12 @@ class VectorMath
 
     static void Main()
     {
+        Vector3 X, Y, Z;
+
         VectorMath MathVectors = new VectorMath();
         MathVectors.FloatAttributtes();
         MathVectors.StructOnZero();
-        MathVectors.InitializeParameters();
+        MathVectors.InitializeParameters(out X , out Y , out Z);
         MathVectors.Plus();
         MathVectors.Minus();
         MathVectors.Distance2();
@@ -54,13 +56,13 @@ class VectorMath
         Console.WriteLine($"In Function StructOnZero  \n Vector3 with all Axes on Zero : {vector}\n");
     }
 
-    private void InitializeParameters(Vector3 X , Vector3 Y)
+    private void InitializeParameters(out Vector3 X , out Vector3 Y , out Vector3 Z)
     {
         X = new Vector3(1f, 3f, 5f);
         Y = new Vector3(10f, 30f, 50f);
         Z = new Vector3(100f, 300f, 500f);
 
-        Console.WriteLine($"In Function InitializeParameters  \n X Vector : {X} ,\n Y Vector : {StructVectorY} ,\n Z Vector : {StructVectorZ}\n");
+        Console.WriteLine($"In Function InitializeParameters  \n X Vector : {X} ,\n Y Vector : {Y} ,\n Z Vector : {Z}\n");
 
     }
 
