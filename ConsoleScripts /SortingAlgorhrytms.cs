@@ -123,7 +123,7 @@ class SortierAlgorhytmen
             else
             {
                 result.Add(right[j]);
-                i++;
+                j++;
             }
         }
 
@@ -133,10 +133,10 @@ class SortierAlgorhytmen
             i++;
         }
 
-        while (i < right.Count)
+        while (j < right.Count)
         {
             result.Add(right[j]);
-            i++;
+            j++;
         }
 
         return result;
