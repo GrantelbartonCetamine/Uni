@@ -9,25 +9,58 @@ class SortierAlgorhytmen
 
     static void Main()
     {
-        List<int> numbers = InitializeRandomNumbers();
+        List<int> numbers = Initialize();
         Decide(numbers);
     }
 
-    static List<int> InitializeRandomNumbers()
+    static List<int> Initialize()
     {
         List<int> Numbers = new List<int>();
-        Console.WriteLine("Enter numbers (type 'Next' to finish):");
+
+        Console.WriteLine("How You Want to Initialize the numbers ('1' for Manual Or '2' for Random )");
+
+        string Choice = Console.ReadLine();
 
         while (true)
         {
-            string UserInput = Console.ReadLine();
-            if (UserInput.ToLower() == "next")
+            if (Choice == "1")
+            {
+                Numbers = InitializeManualNumbers();
+                break;
+            }
+
+            else if (Choice == "2")
+            {
+                Numbers = InitializeRandomNumbers();
+                break;
+            }
+
+            else
+            {
+                Console.WriteLine("Sorry Wrong Input ");
+                Choice = Console.ReadLine();
+            }
+
+        }
+
+        return Numbers;
+    }
+
+    static List<int> InitializeManualNumbers()
+    {
+        List<int> numbers = new List<int>();
+        Console.WriteLine("Enter numbers (type 'Next' to Choose Between an Algorhytm):");
+
+        while (true)
+        {
+            string userInput = Console.ReadLine();
+            if (userInput.ToLower() == "next")
             {
                 break;
             }
-            else if (int.TryParse(UserInput, out int number))
+            else if (int.TryParse(userInput, out int number))
             {
-                Numbers.Add(number);
+                numbers.Add(number);
                 Console.WriteLine($"Added number {number} to the list.");
             }
             else
@@ -35,7 +68,44 @@ class SortierAlgorhytmen
                 Console.WriteLine("Please enter a valid number.");
             }
         }
-        return Numbers;
+
+        return numbers;
+    }
+
+    static List<int> ZickZackSort(List<int> list)
+    {
+        List <int> zickZackList = new List<int>();
+        list.Sort();
+
+        while (list.Count > 0)
+        {
+            zickZackList.Add(list[list.Count() - 1]);
+            list.RemoveAt(list.Count() - 1);
+
+            if (list.Count > 0)
+
+            {
+                zickZackList.Add(list[0]);
+                list.RemoveAt(0);
+            }
+        }
+        return zickZackList;
+    }
+
+    static List<int> InitializeRandomNumbers()
+    {
+        List<int> numbers = new List<int>();
+        Random rnd = new Random();
+
+        Console.WriteLine("How Many Numbers you Want to Generate?");
+        int nNumbers = int.Parse(Console.ReadLine());
+
+        for (int i = 0; i < nNumbers; i++)
+        {
+            numbers.Add(rnd.Next(1, 50));
+        }
+        Console.WriteLine($"Generated : {nNumbers} numbers ");
+        return numbers;
     }
 
     static void BubbleGum(List<int> MyList)
@@ -139,14 +209,15 @@ class SortierAlgorhytmen
             j++;
         }
 
-        return result;
+        return (result) ;
     }
+
 
 
     static void Decide(List<int> numbers)
     {
 
-        Console.WriteLine("Choose between an Algorithm (1 for BubbleGum , 2 for QuickSort , 3 for MergeSort):");
+        Console.WriteLine("Choose between an Algorithm (1 for BubbleGum , 2 for QuickSort , 3 for MergeSort , 4 for ZickZackSort):");
         string userinput = Console.ReadLine();
         if (userinput == "1")
         {
@@ -161,9 +232,15 @@ class SortierAlgorhytmen
         else if (userinput == "3")
 
         {
-            List<int> sortedNumbers = MergeSort(numbers); 
-            numbers.Clear(); 
-            numbers.AddRange(sortedNumbers); 
+            List<int> sortedNumbers = MergeSort(numbers);
+            numbers.Clear();
+            numbers.AddRange(sortedNumbers);
+        }
+
+        else if (userinput == "4")
+
+        {
+            numbers = ZickZackSort(numbers);
         }
 
         foreach (var num in numbers)
