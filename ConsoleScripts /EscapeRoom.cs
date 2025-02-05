@@ -1,16 +1,16 @@
 using System;
 class EscapeRoom
 {
-    static int height;
-    static int width;
+    static int Height;
+    static int Width;
     static int PlayerX = 2;
     static int PlayerY = 2;
     static int KeyX = 0;
     static int KeyY = 0;
     static int DoorX = 0;
     static int DoorY = 0;
-    static bool haskey = false;
-    static Random random = new Random();
+    static bool HasKey = false;
+    static Random Random = new Random();
     enum ObjectType
     {
         Ground,
@@ -19,7 +19,7 @@ class EscapeRoom
         Door,
         Key,
     }
-    static ObjectType[,] mapArray;
+    static ObjectType[,] MapArray;
     static void Main()
     {
         var random = new Random();
@@ -36,7 +36,8 @@ class EscapeRoom
     static void PlayerGreeting()
     {
         Console.WriteLine("This is a EscapeRoom \nThe Goal is to find the Exit Good Luck");
-        Console.WriteLine("")
+        Console.Write("You can Press W for going Forward\nA for going Left\nS for going Back \nAnd D for going to the Right");
+        Console.WriteLine("Or you can use Numpad or Arrow buttons");
     }
     static void HandleMapSize()
     {
@@ -46,9 +47,9 @@ class EscapeRoom
             {
                 Console.WriteLine("Height: ");
                 string userInput = Console.ReadLine();
-                if (int.TryParse(userInput, out height) && height >= 5)
+                if (int.TryParse(userInput, out Height) && Height >= 5)
                 {
-                    Console.WriteLine($"Set Map height to {height}");
+                    Console.WriteLine($"Set Map height to {Height}");
                     break;
                 }
                 else
@@ -60,9 +61,9 @@ class EscapeRoom
             {
                 Console.WriteLine("Width: ");
                 string userInput = Console.ReadLine();
-                if (int.TryParse(userInput, out width) && width >= 5)
+                if (int.TryParse(userInput, out Width) && Width >= 5)
                 {
-                    Console.WriteLine($"Set Map width to {width}");
+                    Console.WriteLine($"Set Map width to {Width}");
                     break;
                 }
                 else
@@ -74,63 +75,63 @@ class EscapeRoom
     }
     static void SetPlayertoMap()
     {
-        PlayerX = random.Next(1, height - 1);
-        PlayerY = random.Next(1, width - 1);
-        mapArray[PlayerX, PlayerY] = ObjectType.Player;
+        PlayerX = Random.Next(1, Height - 1);
+        PlayerY = Random.Next(1, Width - 1);
+        MapArray[PlayerX, PlayerY] = ObjectType.Player;
     }
     static void SetKeytoMap()
     {
         do
         {
-            KeyX = random.Next(1, height - 1);
-            KeyY = random.Next(1, width - 1);
+            KeyX = Random.Next(1, Height - 1);
+            KeyY = Random.Next(1, Width - 1);
 
-        } while (mapArray[KeyX, KeyY] != ObjectType.Ground);
+        } while (MapArray[KeyX, KeyY] != ObjectType.Ground);
 
-        mapArray[KeyX, KeyY] = ObjectType.Key;
+        MapArray[KeyX, KeyY] = ObjectType.Key;
     }
     static void SetDoortoMap()
     {
-        int randomwall = random.Next(4);
+        int randomWall = Random.Next(4);
 
 
-        if (randomwall == 0)
+        if (randomWall == 0)
         {
             Console.BackgroundColor = ConsoleColor.Yellow;
             Console.WriteLine(" ");
             DoorX = 0;
-            DoorY = random.Next(1, width - 1);
+            DoorY = Random.Next(1, Width - 1);
             Console.ResetColor();
         }
-        else if (randomwall == 1)
+        else if (randomWall == 1)
         {
             Console.BackgroundColor = ConsoleColor.Yellow;
             Console.WriteLine(" ");
-            DoorX = height - 1;
-            DoorY = random.Next(1, width - 1);
+            DoorX = Height - 1;
+            DoorY = Random.Next(1, Width - 1);
             Console.ResetColor();
         }
-        else if (randomwall == 2)
+        else if (randomWall == 2)
         {
             Console.BackgroundColor = ConsoleColor.Yellow;
             Console.WriteLine(" ");
-            DoorX = random.Next(1, height - 1);
-            DoorY = width - 1;
+            DoorX = Random.Next(1, Height - 1);
+            DoorY = Width - 1;
             Console.ResetColor();
         }
-        else if (randomwall == 3)
+        else if (randomWall == 3)
         {
             Console.BackgroundColor = ConsoleColor.Yellow;
             Console.WriteLine(" ");
-            DoorX = random.Next(1, height - 1);
-            DoorY = height - 1;
+            DoorX = Random.Next(1, Height - 1);
+            DoorY = Height - 1;
             Console.ResetColor();
         }
-        mapArray[DoorX, DoorY] = ObjectType.Door;
+        MapArray[DoorX, DoorY] = ObjectType.Door;
     }
     static void WinLogic()
     {
-        if (PlayerX == DoorX && PlayerY == DoorY && haskey == true)
+        if (PlayerX == DoorX && PlayerY == DoorY && HasKey == true)
         {
             Console.WriteLine("Congratulations! You've found the door and escaped!");
             Environment.Exit(0);
@@ -138,39 +139,39 @@ class EscapeRoom
     }
     static void CheckforKey()
     {
-        if (mapArray[PlayerX, PlayerY] == ObjectType.Key)
+        if (MapArray[PlayerX, PlayerY] == ObjectType.Key)
         {
-            haskey = true;
+            HasKey = true;
             Console.WriteLine("You Collected the Key");
-            mapArray[PlayerX, PlayerY] = ObjectType.Ground;
+            MapArray[PlayerX, PlayerY] = ObjectType.Ground;
         }
     }
 
     static void InitialzeMap()
     {
-        mapArray = new ObjectType[height, width];
-        for (int x = 0; x < height; x++)
+        MapArray = new ObjectType[Height, Width];
+        for (int x = 0; x < Height; x++)
         {
-            for (int y = 0; y < width; y++)
+            for (int y = 0; y < Width; y++)
             {
-                if (x == 0 || x == height - 1 || y == 0 || y == width - 1)
+                if (x == 0 || x == Height - 1 || y == 0 || y == Width - 1)
                 {
-                    mapArray[x, y] = ObjectType.Wall;
+                    MapArray[x, y] = ObjectType.Wall;
                 }
                 else
                 {
-                    mapArray[x, y] = ObjectType.Ground;
+                    MapArray[x, y] = ObjectType.Ground;
                 }
             }
         }
     }
     static void PrintMap()
     {
-        for (int x = 0; x < height; x++)
+        for (int x = 0; x < Height; x++)
         {
-            for (int y = 0; y < width; y++)
+            for (int y = 0; y < Width; y++)
             {
-                switch (mapArray[x, y])
+                switch (MapArray[x, y])
                 {
                     case ObjectType.Ground:
                         Console.BackgroundColor = ConsoleColor.DarkMagenta;
@@ -206,32 +207,31 @@ class EscapeRoom
         int newPlayerPositionX = PlayerX + HorizontalX;
         int newPlayerPositionY = PlayerY + VerticalY;
 
-        if (newPlayerPositionX < 0 || newPlayerPositionX >= height ||
-            newPlayerPositionY < 0 || newPlayerPositionY >= width ||
-            mapArray[newPlayerPositionX, newPlayerPositionY] == ObjectType.Wall)
+        if (newPlayerPositionX < 0 || newPlayerPositionX >= Height ||
+            newPlayerPositionY < 0 || newPlayerPositionY >= Width ||
+            MapArray[newPlayerPositionX, newPlayerPositionY] == ObjectType.Wall)
         {
             return;
         }
 
-        if (mapArray[newPlayerPositionX, newPlayerPositionY] == ObjectType.Door && !haskey)
+        if (MapArray[newPlayerPositionX, newPlayerPositionY] == ObjectType.Door && !HasKey)
         {
             Console.WriteLine("You need the key to open the door!");
             return;
         }
 
-        mapArray[PlayerX, PlayerY] = ObjectType.Ground;
+        MapArray[PlayerX, PlayerY] = ObjectType.Ground;
         PlayerX = newPlayerPositionX;
         PlayerY = newPlayerPositionY;
 
         CheckforKey();
-        mapArray[PlayerX, PlayerY] = ObjectType.Player;
+        MapArray[PlayerX, PlayerY] = ObjectType.Player;
         WinLogic();
     }
 
     static void HandlePlayerMovement()
     {
-        Console.Write("You can Press W for going Forward\nA for going Left\nS for going Back \nAnd D for going to the Right");
-        Console.WriteLine("\nOr you can use Numpad or Arrow buttons");
+        PlayerGreeting();
         while (true)
         {
             ConsoleKeyInfo keyInfo = Console.ReadKey();
