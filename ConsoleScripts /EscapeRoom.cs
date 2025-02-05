@@ -35,7 +35,8 @@ class EscapeRoom
     }
     static void PlayerGreeting()
     {
-        Console.WriteLine("This is a EscapeRoom \nThe Goal is to find the Exit");
+        Console.WriteLine("This is a EscapeRoom \nThe Goal is to find the Exit Good Luck");
+        Console.WriteLine("")
     }
     static void HandleMapSize()
     {
