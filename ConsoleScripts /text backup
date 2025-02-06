@@ -1,0 +1,61 @@
+Strukturplan
+
+Mechaniken  1
+
+User kann einen von 4 Monstern auswählen , dannach kann er eingeben was seine werte sein sollen , dannach kan der User von 2 Verschiedenen Attack 
+aussuchen wie er damage machen möchte.
+
+
+Game Initialisierung 2
+
+2.1 User kann Zwischen 4 Verschiedenen Characktern 1 Auswählen
+
+2.2 In Console wird ausgegeben was der User gewählt hat 
+
+2.3 User gibt Health für seinen Charackter ein
+
+2.4 User gibt Defensepoints für seinen Charackter ein
+
+2.5 User gibt Attackspeed für seinen Charackter ein
+
+2.6 User gibt AttackDamage für seinen Charackter ein
+
+2.7 User gibt die Stärke für seine Special Ability ein
+
+2.8 Random Enemy wird für den User Initialisiert , es kann kein Kampf zwischen 2 gleichen Charactern geben
+
+2.10 In Console wird ausgegeben wie viel DefensPoints sein Gegner hat
+
+2.11 Fight beginnt
+
+2.12 User kann zwischen 2 Atacken wählen 
+
+2.13 Kamp geht solange bis einer keine Leben mehr hat
+
+
+Game Logik 3
+
+3.1 User kann zwischen 4 Verschiedenen Charackter auswählen
+
+3.2 User gibt Attribute für seinenen Charackter ein
+
+3.3 Random Enemy wird gesetzt
+
+3.4 User bekommt 2 Auswahlmöglickeiten wie er Angreifen möchte
+
+3.5 Kamp geht solange bis Enemy oder User keine Leben mehr habe
+
+
+Ablaufplan
+
+1 Start des Games
+
+2 User wählt von 4 verschiedenen Charackter seinen Player
+
+3 User gibt Attribute ein
+
+4 Enemy wird gewählt
+
+5 Kampf beginnt User muss Angreifen um zu gewinnen
+
+6 Kampf vorbei wenn einer keine Leben mehr hat
