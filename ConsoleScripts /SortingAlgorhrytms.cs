@@ -74,7 +74,7 @@ class SortierAlgorhytmen
 
     static List<int> ZickZackSort(List<int> list)
     {
-        List <int> zickZackList = new List<int>();
+        List<int> zickZackList = new List<int>();
         list.Sort();
 
         while (list.Count > 0)
@@ -108,7 +108,20 @@ class SortierAlgorhytmen
         return numbers;
     }
 
-    static void BubbleGum(List<int> MyList)
+    static bool SortOrder()
+    {
+        Console.WriteLine("Do you Want do Sort Ascending '1' or Descending '2' ");
+        string orderChoice = Console.ReadLine();
+
+        while (orderChoice != "1" && orderChoice != "2")
+        {
+            Console.WriteLine("Sorry wrong Input");
+            orderChoice = Console.ReadLine();
+        }
+        return orderChoice == "2";
+    }
+
+    static void BubbleGum(List<int> MyList, bool descending)
     {
         bool isSorted;
         do
@@ -116,7 +129,7 @@ class SortierAlgorhytmen
             isSorted = true;
             for (int i = 0; i < MyList.Count - 1; i++)
             {
-                if (MyList[i] > MyList[i + 1])
+                if ((descending && MyList[i] > MyList[i + 1]) || (!descending && MyList[i] > MyList[i + 1]))
                 {
                     int PlaceHolder = MyList[i];
                     MyList[i] = MyList[i + 1];
@@ -128,14 +141,19 @@ class SortierAlgorhytmen
     }
 
 
-    static void QuickSortAlgo(List<int> list, int low, int high)
+    static void QuickSortAlgo(List<int> list, int low, int high, bool descending)
     {
         if (low < high)
         {
             int index = Decision(list, low, high);
-            QuickSortAlgo(list, low, index - 1);
-            QuickSortAlgo(list, index + 1, high);
+            QuickSortAlgo(list, low, index - 1, descending);
+            QuickSortAlgo(list, index + 1, high, descending);
 
+        }
+
+        if (descending)
+        {
+            list.Reverse();
         }
     }
 
@@ -159,11 +177,9 @@ class SortierAlgorhytmen
         list[i + 1] = list[high];
         list[high] = temp;
         return i + 1;
-
-
     }
 
-    static List<int> MergeSort(List<int> list)
+    static List<int> MergeSort(List<int> list, bool descending)
     {
         if (list.Count <= 1)
             return list;
@@ -172,10 +188,14 @@ class SortierAlgorhytmen
         List<int> left = list.GetRange(0, midSort);
         List<int> right = list.GetRange(midSort, list.Count - midSort);
 
-        left = MergeSort(left);
-        right = MergeSort(right);
+        left = MergeSort(left, descending);
+        right = MergeSort(right, descending);
 
-        return Merging(left, right);
+        List<int> sortedList = Merging(left, right);
+        if (descending) sortedList.Reverse();
+
+        return sortedList;
+
 
     }
     static List<int> Merging(List<int> left, List<int> right)
@@ -209,7 +229,7 @@ class SortierAlgorhytmen
             j++;
         }
 
-        return (result) ;
+        return (result);
     }
 
 
@@ -219,20 +239,22 @@ class SortierAlgorhytmen
 
         Console.WriteLine("Choose between an Algorithm (1 for BubbleGum , 2 for QuickSort , 3 for MergeSort , 4 for ZickZackSort):");
         string userinput = Console.ReadLine();
+        bool descending = SortOrder();
+
         if (userinput == "1")
         {
-            BubbleGum(numbers);
+            BubbleGum(numbers, descending);
         }
         else if (userinput == "2")
 
         {
-            QuickSortAlgo(numbers, 0, numbers.Count - 1);
+            QuickSortAlgo(numbers, 0, numbers.Count - 1, descending);
         }
 
         else if (userinput == "3")
 
         {
-            List<int> sortedNumbers = MergeSort(numbers);
+            List<int> sortedNumbers = MergeSort(numbers, descending);
             numbers.Clear();
             numbers.AddRange(sortedNumbers);
         }
