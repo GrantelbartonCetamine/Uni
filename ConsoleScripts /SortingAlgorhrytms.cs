@@ -1,114 +1,130 @@
-using System;
-using System.Collections.Generic;
-using static System.Net.Mime.MediaTypeNames;
-using System.Reflection;
-using System.Collections;
-
 class SortierAlgorhytmen
 {
-
     static void Main()
     {
-        List<int> numbers = Initialize();
-        Decide(numbers);
+        Manager manager = new Manager();
+        manager.Initialize();
+        manager.Sorting();
     }
-
-    static List<int> Initialize()
+    class Manager
     {
-        List<int> Numbers = new List<int>();
 
-        Console.WriteLine("How You Want to Initialize the numbers ('1' for Manual Or '2' for Random )");
-
-        string Choice = Console.ReadLine();
-
-        while (true)
+        private List<int> Numbers = new List<int>();
+        public void Initialize()
         {
-            if (Choice == "1")
-            {
-                Numbers = InitializeManualNumbers();
-                break;
-            }
+            Console.WriteLine("How You Want to Initialize the numbers ('1' for Manual Or '2' for Random )");
+            string Choice = Console.ReadLine();
 
-            else if (Choice == "2")
+            while (true)
             {
-                Numbers = InitializeRandomNumbers();
-                break;
-            }
+                if (Choice == "1")
+                {
+                    Numbers = InitializeManualNumbers();
+                    break;
+                }
 
-            else
-            {
-                Console.WriteLine("Sorry Wrong Input ");
-                Choice = Console.ReadLine();
-            }
+                else if (Choice == "2")
+                {
+                    Numbers = InitializeRandomNumbers();
+                    break;
+                }
 
+                else
+                {
+                    Console.WriteLine("Sorry Wrong Input ");
+                    Choice = Console.ReadLine();
+                }
+
+            }
         }
 
-        return Numbers;
-    }
-
-    static List<int> InitializeManualNumbers()
-    {
-        List<int> numbers = new List<int>();
-        Console.WriteLine("Enter numbers (type 'Next' to Choose Between an Algorhytm):");
-
-        while (true)
+        private List<int> InitializeManualNumbers()
         {
+            List<int> numbers = new List<int>();
+            Console.WriteLine("Enter numbers (type 'Next' to Choose Between an Algorhytm):");
+
+            while (true)
+            {
+                string userInput = Console.ReadLine();
+                if (userInput.ToLower() == "next")
+                {
+                    break;
+                }
+                else if (int.TryParse(userInput, out int number))
+                {
+                    numbers.Add(number);
+                    Console.WriteLine($"Added number {number} to the list.");
+                }
+                else
+                {
+                    Console.WriteLine("Please enter a valid number.");
+                }
+            }
+
+            return numbers;
+        }
+        public List<int> InitializeRandomNumbers()
+        {
+            List<int> numbers = new List<int>();
+            Random rnd = new Random();
+
+            Console.WriteLine("How Many Numbers you Want to Generate?");
+            int nNumbers = int.Parse(Console.ReadLine());
+
+            for (int i = 0; i < nNumbers; i++)
+            {
+                numbers.Add(rnd.Next(1, 50));
+            }
+            Console.WriteLine("Generated Numbers: ");
+            foreach (int number in numbers)
+            {
+                Console.WriteLine(number); 
+            }
+
+            Console.WriteLine($"Generated: {nNumbers} numbers");
+            return numbers;
+        }
+
+
+        public void Sorting()
+        {
+            Console.WriteLine("Choose between an Algorithm (1 for BubbleGum , 2 for QuickSort , 3 for MergeSort , 4 for ZickZackSort):");
             string userInput = Console.ReadLine();
-            if (userInput.ToLower() == "next")
+            bool descending = SortOrder();
+
+            switch (userInput)
             {
-                break;
+                case "1":
+                    Algorhytms.BubbleGum(Numbers, descending);
+                    break;
+
+                case "2":
+                    Algorhytms.QuickSortAlgo(Numbers, 0, Numbers.Count - 1, descending);
+                    break;
+
+                case "3":
+                    Algorhytms.MergeSort(Numbers, descending);
+                    break;
+
+                case "4":
+                    Algorhytms.ZickZackSort(Numbers);
+                    break;
+
+                default:
+                    Console.WriteLine("Wrong Input");
+                    break;
             }
-            else if (int.TryParse(userInput, out int number))
+            Console.WriteLine("Sorted Numbers : ");
+            foreach (var numbers in Numbers)
             {
-                numbers.Add(number);
-                Console.WriteLine($"Added number {number} to the list.");
-            }
-            else
-            {
-                Console.WriteLine("Please enter a valid number.");
-            }
-        }
-
-        return numbers;
-    }
-
-    static List<int> ZickZackSort(List<int> list)
-    {
-        List<int> zickZackList = new List<int>();
-        list.Sort();
-
-        while (list.Count > 0)
-        {
-            zickZackList.Add(list[list.Count() - 1]);
-            list.RemoveAt(list.Count() - 1);
-
-            if (list.Count > 0)
-
-            {
-                zickZackList.Add(list[0]);
-                list.RemoveAt(0);
+                Console.WriteLine(numbers);
             }
         }
-        return zickZackList;
+        
+
     }
 
-    static List<int> InitializeRandomNumbers()
-    {
-        List<int> numbers = new List<int>();
-        Random rnd = new Random();
-
-        Console.WriteLine("How Many Numbers you Want to Generate?");
-        int nNumbers = int.Parse(Console.ReadLine());
-
-        for (int i = 0; i < nNumbers; i++)
-        {
-            numbers.Add(rnd.Next(1, 50));
-        }
-        Console.WriteLine($"Generated : {nNumbers} numbers ");
-        return numbers;
-    }
-
-    static bool SortOrder()
+    public static bool SortOrder()
     {
         Console.WriteLine("Do you Want do Sort Ascending '1' or Descending '2' ");
         string orderChoice = Console.ReadLine();
@@ -121,153 +137,133 @@ class SortierAlgorhytmen
         return orderChoice == "2";
     }
 
-    static void BubbleGum(List<int> MyList, bool descending)
+    class Algorhytms
     {
-        bool isSorted;
-        do
+        public static void BubbleGum(List<int> myList, bool descending)
         {
-            isSorted = true;
-            for (int i = 0; i < MyList.Count - 1; i++)
+            bool isSorted;
+            do
             {
-                if ((descending && MyList[i] > MyList[i + 1]) || (!descending && MyList[i] > MyList[i + 1]))
+                isSorted = true;
+                for (int i = 0; i < myList.Count - 1; i++)
                 {
-                    int PlaceHolder = MyList[i];
-                    MyList[i] = MyList[i + 1];
-                    MyList[i + 1] = PlaceHolder;
-                    isSorted = false;
+                    if ((descending && myList[i] > myList[i + 1]) || (!descending && myList[i] > myList[i + 1]))
+                    {
+                        int PlaceHolder = myList[i];
+                        myList[i] = myList[i + 1];
+                        myList[i + 1] = PlaceHolder;
+                        isSorted = false;
+                    }
+                }
+            } while (!isSorted);
+        }
+        public static void QuickSortAlgo(List<int> list, int low, int high, bool descending)
+        {
+            if (low < high)
+            {
+                int index = Decision(list, low, high);
+                QuickSortAlgo(list, low, index - 1, descending);
+                QuickSortAlgo(list, index + 1, high, descending);
+
+            }
+
+            if (descending)
+            {
+                list.Reverse();
+            }
+        }
+        public static int Decision(List<int> list, int low, int high)
+        {
+            int boundary = list[high];
+            int i = low - 1;
+
+            for (int j = low; j < high; j++)
+            {
+
+                if (list[j] <= boundary)
+                {
+                    i++;
+                    int placeholder = list[i];
+                    list[i] = list[j];
+                    list[j] = placeholder;
                 }
             }
-        } while (!isSorted);
-    }
-
-
-    static void QuickSortAlgo(List<int> list, int low, int high, bool descending)
-    {
-        if (low < high)
-        {
-            int index = Decision(list, low, high);
-            QuickSortAlgo(list, low, index - 1, descending);
-            QuickSortAlgo(list, index + 1, high, descending);
-
+            int temp = list[i + 1];
+            list[i + 1] = list[high];
+            list[high] = temp;
+            return i + 1;
         }
 
-        if (descending)
+        public static List<int> ZickZackSort(List<int> list)
         {
-            list.Reverse();
-        }
-    }
+            List<int> zickZackList = new List<int>();
+            list.Sort();
 
-    static int Decision(List<int> list, int low, int high)
-    {
-        int boundary = list[high];
-        int i = low - 1;
-
-        for (int j = low; j < high; j++)
-        {
-
-            if (list[j] <= boundary)
+            while (list.Count > 0)
             {
-                i++;
-                int placeholder = list[i];
-                list[i] = list[j];
-                list[j] = placeholder;
+                zickZackList.Add(list[list.Count() - 1]);
+                list.RemoveAt(list.Count() - 1);
+
+                if (list.Count > 0)
+                {
+                    zickZackList.Add(list[0]);
+                    list.RemoveAt(0);
+                }
             }
+            return zickZackList;
         }
-        int temp = list[i + 1];
-        list[i + 1] = list[high];
-        list[high] = temp;
-        return i + 1;
-    }
 
-    static List<int> MergeSort(List<int> list, bool descending)
-    {
-        if (list.Count <= 1)
-            return list;
-
-        int midSort = list.Count / 2;
-        List<int> left = list.GetRange(0, midSort);
-        List<int> right = list.GetRange(midSort, list.Count - midSort);
-
-        left = MergeSort(left, descending);
-        right = MergeSort(right, descending);
-
-        List<int> sortedList = Merging(left, right);
-        if (descending) sortedList.Reverse();
-
-        return sortedList;
-
-
-    }
-    static List<int> Merging(List<int> left, List<int> right)
-    {
-        List<int> result = new List<int>();
-        int i = 0, j = 0;
-
-        while (i < left.Count && j < right.Count)
+        public static List<int> MergeSort(List<int> list, bool descending)
         {
-            if (left[i] < right[j])
+            if (list.Count <= 1)
+                return list;
+
+            int midSort = list.Count / 2;
+            List<int> left = list.GetRange(0, midSort);
+            List<int> right = list.GetRange(midSort, list.Count - midSort);
+
+            left = MergeSort(left, descending);
+            right = MergeSort(right, descending);
+
+            List<int> sortedList = Merging(left, right);
+            if (descending) sortedList.Reverse();
+
+            return sortedList;
+        }
+
+        public static List<int> Merging(List<int> left, List<int> right)
+        {
+            List<int> result = new List<int>();
+            int i = 0, j = 0;
+
+            while (i < left.Count && j < right.Count)
+            {
+                if (left[i] < right[j])
+                {
+                    result.Add(left[i]);
+                    i++;
+                }
+                else
+                {
+                    result.Add(right[j]);
+                    j++;
+                }
+            }
+
+            while (i < left.Count)
             {
                 result.Add(left[i]);
                 i++;
             }
-            else
+
+            while (j < right.Count)
             {
                 result.Add(right[j]);
                 j++;
             }
-        }
 
-        while (i < left.Count)
-        {
-            result.Add(left[i]);
-            i++;
-        }
-
-        while (j < right.Count)
-        {
-            result.Add(right[j]);
-            j++;
-        }
-
-        return (result);
-    }
-
-
-
-    static void Decide(List<int> numbers)
-    {
-
-        Console.WriteLine("Choose between an Algorithm (1 for BubbleGum , 2 for QuickSort , 3 for MergeSort , 4 for ZickZackSort):");
-        string userinput = Console.ReadLine();
-        bool descending = SortOrder();
-
-        if (userinput == "1")
-        {
-            BubbleGum(numbers, descending);
-        }
-        else if (userinput == "2")
-
-        {
-            QuickSortAlgo(numbers, 0, numbers.Count - 1, descending);
-        }
-
-        else if (userinput == "3")
-
-        {
-            List<int> sortedNumbers = MergeSort(numbers, descending);
-            numbers.Clear();
-            numbers.AddRange(sortedNumbers);
-        }
-
-        else if (userinput == "4")
-
-        {
-            numbers = ZickZackSort(numbers);
-        }
-
-        foreach (var num in numbers)
-        {
-            Console.WriteLine(num);
+            return (result);
         }
     }
 }
+
