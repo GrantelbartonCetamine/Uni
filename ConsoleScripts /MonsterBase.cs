@@ -1,6 +1,6 @@
 using System;
 
-public class MonsterBase
+public abstract class MonsterBase
 {
     public int HealthPoints { get; set; }
     public int DefensePoints { get; set; }
@@ -8,7 +8,11 @@ public class MonsterBase
     public int Attack { get; set; }
     public int SpecialAbility { get; set; }
 
-    public MonsterBase(int health, int defensepoints, float attackspeed, int attack, int specialability)
+
+
+
+
+    protected MonsterBase(int health, int defensepoints, float attackspeed, int attack, int specialability)
     {
 
         HealthPoints = health;
@@ -17,7 +21,40 @@ public class MonsterBase
         Attack = attack;
         SpecialAbility = specialability;
     }
+
+
+
+
+
+
+    public virtual int CalculateBaseDamage(MonsterBase target)
+    {
+        // Logic for BaseDamage and return atleast 1 damage
+        int damage = Attack + (int)AttackSpeed - target.DefensePoints;
+        return Math.Max(damage, 1);
+    }
+
+
+
+
+    public virtual int CalculateDamageSpecialDamage(MonsterBase target)
+    {
+        int specialDamage = SpecialAbility + (int)AttackSpeed - target.DefensePoints;
+        return Math.Max(specialDamage, 1);
+    }
+
+
+
+
+
+    public void TakeDamage(int damageAmount)
+    {
+        HealthPoints -= damageAmount;
+    }
+    public abstract override string ToString();
 }
+
+
 
 public class Ork : MonsterBase
 {
@@ -28,6 +65,8 @@ public class Ork : MonsterBase
     }
     public override string ToString() => "Ork";
 }
+
+
 
 public class Goblin : MonsterBase
 {
@@ -40,6 +79,8 @@ public class Goblin : MonsterBase
 
 }
 
+
+
 public class Archer : MonsterBase
 {
     public Archer(int health, int defensepoints, float attackspeed, int attack, int specialability)
@@ -51,6 +92,8 @@ public class Archer : MonsterBase
 
 }
 
+
+
 public class Troll : MonsterBase
 {
     public Troll(int health, int defensepoints, float attackspeed, int attack, int specialability)
@@ -61,4 +104,3 @@ public class Troll : MonsterBase
     public override string ToString() => "Troll";
 
 }
-
