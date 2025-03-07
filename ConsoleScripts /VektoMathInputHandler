@@ -1,0 +1,49 @@
+public class InputHandler
+{
+    public static List<int> GetManualInput()
+    {
+        var numbers = new List<int>();
+        Console.WriteLine("Enter numbers (type 'Next' to choose an algorithm):");
+
+        while (true)
+        {
+            string userInput = Console.ReadLine();
+            if (userInput.ToLower() == "next")
+                break;
+
+            if (int.TryParse(userInput, out int number))
+            {
+                numbers.Add(number);
+                Console.WriteLine($"Added number {number} to the list.");
+            }
+            else
+            {
+                Console.WriteLine("Please enter a valid number.");
+            }
+        }
+
+        return numbers;
+    }
+
+    public static List<int> GetRandomInput()
+    {
+        var numbers = new List<int>();
+        Random rnd = new Random();
+
+        Console.WriteLine("How many numbers would you like to generate?");
+        int nNumbers = int.Parse(Console.ReadLine());
+
+        for (int i = 0; i < nNumbers; i++)
+        {
+            numbers.Add(rnd.Next(1, 50));
+        }
+
+        Console.WriteLine("Generated Numbers:");
+        foreach (int number in numbers)
+        {
+            Console.WriteLine(number);
+        }
+        return numbers;
+    }
+}
+
