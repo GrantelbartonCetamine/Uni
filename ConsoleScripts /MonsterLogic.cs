@@ -142,9 +142,26 @@ class Game
         Console.WriteLine($"You chose {player}, your opponent is {enemy}!");
 
         fightManager.Fight(player, enemy);
+        NoSameEnemy(player);
+    }
+    void NoSameEnemy(MonsterBase player2)
+    {
+        if (player2 is Archer)
+        {
+            Console.WriteLine($"Archer have {player2.DefensePoints} DefensePoints");
+        }
+        else if (player2 is Ork)
+        {
+            Console.WriteLine($"Ork have {player2.DefensePoints} DefensePoints");
+        }
+
+        else if (player2 is Troll)
+        {
+            Console.WriteLine($"Troll have {player2.DefensePoints} DefensePoints");
+        }
     }
 
-}
+    }
 
 public class Program
 {
@@ -154,3 +171,4 @@ public class Program
         game.StartGame();
     }
 }
+    }
