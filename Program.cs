@@ -1,87 +1,143 @@
-﻿using System;
-
-public abstract class MonsterBase
-{
-    public int HealthPoints { get; set; }
-    public int DefensePoints { get; set; }
-    public float AttackSpeed { get; set; }
-    public int Attack { get; set; }
-    public int SpecialAbility { get; set; }
-
-    protected MonsterBase(int health, int defensepoints, float attackspeed, int attack, int specialability)
+﻿class SortingAlgorhytms
+{   
+    public static void BubbleGum(List<int> myList, bool descending)
     {
-
-        HealthPoints = health;
-        DefensePoints = defensepoints;
-        AttackSpeed = attackspeed;
-        Attack = attack;
-        SpecialAbility = specialability;
+        bool isSorted;
+        do
+        {
+            isSorted = true;
+            for (int i = 0; i < myList.Count - 1; i++)
+            {
+                if ((descending && myList[i] > myList[i + 1]) || (!descending && myList[i] > myList[i + 1]))
+                {
+                    int PlaceHolder = myList[i];
+                    myList[i] = myList[i + 1];
+                    myList[i + 1] = PlaceHolder;
+                    isSorted = false;
+                }
+            }
+        } while (!isSorted);
     }
-    // This Calculate the Damage for the Basic Attack 
-    public virtual int CalculateBaseDamage(MonsterBase target)
+    public static void QuickSortAlgo(List<int> list, int low, int high, bool descending)
     {
-        // Logic for BaseDamage and return atleast 1 damage
-        int damage = Attack + (int)AttackSpeed - target.DefensePoints;
-        return Math.Max(damage, 1);
+        if (low < high)
+        {
+            int index = Decision(list, low, high);
+            QuickSortAlgo(list, low, index - 1, descending);
+            QuickSortAlgo(list, index + 1, high, descending);
+        }
+
+        if (descending)
+        {
+            ReverseSortOrder(list);
+        }
     }
 
-
-    // This Calculate the Damage for the Attribute 'SpecialAttack'
-    public virtual int CalculateDamageSpecialDamage(MonsterBase target)
+    public static void ReverseSortOrder(List<int> list)
     {
-        int specialDamage = SpecialAbility + (int)AttackSpeed - target.DefensePoints;
-        return Math.Max(specialDamage, 1);
+        int firstIndex = 0;
+        int lastIndex = list.Count - 1;
+
+        int temp = list[firstIndex];
+        list[firstIndex] = list[lastIndex];
+        list[lastIndex] = temp;
+
+        firstIndex++;
+        lastIndex--;
     }
-
-
-    //This Calculate the Damage that the Player will take whenn enemy Attack the Player
-    public void TakeDamage(int damageAmount)
+    public static int Decision(List<int> list, int low, int high)
     {
-        HealthPoints -= damageAmount;
-    }
-    public abstract override string ToString();
-}
+        int boundary = list[high];
+        int i = low - 1;
 
-// The Monster Classes
-public class Ork : MonsterBase
-{
-    public Ork(int health, int defensepoints, float attackspeed, int attack, int specialability)
-        : base(health, defensepoints, attackspeed, attack, specialability)
+        for (int j = low; j < high; j++)
+        {
+
+            if (list[j] <= boundary)
+            {
+                i++;
+                int placeholder = list[i];
+                list[i] = list[j];
+                list[j] = placeholder;
+            }
+        }
+        int temp = list[i + 1];
+        list[i + 1] = list[high];
+        list[high] = temp;
+        return i + 1;
+    }
+
+    public static List<int> ZickZackSort(List<int> list)
     {
+        List<int> zickZackList = new List<int>();
+        list.Sort();
 
+        while (list.Count > 0)
+        {
+            zickZackList.Add(list[list.Count() - 1]);
+            list.RemoveAt(list.Count() - 1);
+
+            if (list.Count > 0)
+            {
+                zickZackList.Add(list[0]);
+                list.RemoveAt(0);
+            }
+        }
+        return zickZackList;
     }
-    public override string ToString() => "Ork";
-}
 
-public class Goblin : MonsterBase
-{
-    public Goblin(int health, int defensepoints, float attackspeed, int attack, int specialability)
-        : base(health, defensepoints, attackspeed, attack, specialability)
+    public static List<int> MergeSort(List<int> list, bool descending)
     {
+        if (list.Count <= 1)
+            return list;
 
+        int midSort = list.Count / 2;
+        List<int> left = list.GetRange(0, midSort);
+        List<int> right = list.GetRange(midSort, list.Count - midSort);
+
+        left = MergeSort(left, descending);
+        right = MergeSort(right, descending);
+
+        List<int> sortedList = Merging(left, right);
+        if (descending)
+        {
+            ReverseSortOrder(list);
+        }
+
+        return sortedList;
     }
-    public override string ToString() => "Goblin";
 
-}
-
-public class Archer : MonsterBase
-{
-    public Archer(int health, int defensepoints, float attackspeed, int attack, int specialability)
-        : base(health, defensepoints, attackspeed, attack, specialability)
+    public static List<int> Merging(List<int> left, List<int> right)
     {
+        List<int> result = new List<int>();
+        int i = 0, j = 0;
 
+        while (i < left.Count && j < right.Count)
+        {
+            if (left[i] < right[j])
+            {
+                result.Add(left[i]);
+                i++;
+            }
+            else
+            {
+                result.Add(right[j]);
+                j++;
+            }
+        }
+
+        while (i < left.Count)
+        {
+            result.Add(left[i]);
+            i++;
+        }
+
+        while (j < right.Count)
+        {
+            result.Add(right[j]);
+            j++;
+        }
+
+        return (result);
     }
-    public override string ToString() => "Archer";
-
-}
-
-public class Troll : MonsterBase
-{
-    public Troll(int health, int defensepoints, float attackspeed, int attack, int specialability)
-        : base(health, defensepoints, attackspeed, attack, specialability)
-    {
-
-    }
-    public override string ToString() => "Troll";
-
 }
