@@ -1,195 +1,335 @@
+using System;
+using System.Collections;
+using System.Collections.Generic;
+using Unity.VisualScripting;
+using UnityEditor;
 using UnityEngine;
 using UnityEngine.AI;
 
-public class EnemyAi : MonoBehaviour
+public class Behavior : MonoBehaviour
 {
-    public NavMeshAgent Enemy;
-    public Transform Player;
-    public LayerMask GroundLayer, PlayerLayer;
-    public float Health;
-
-    //Vars for Patrolling 
-    public Vector3 WalkPoint;
-    bool WalkPointSet;
-    public float WalkDistance;
-
-    public Transform[] PatrolPoints;
-    private int currentPatrolIndex = 0;
-
-    //Vars for Attacking 
-    public float TimeBetweenAttacks;
-    bool HasAttacked;
-    public GameObject Projectile;
-
-    //States
-    public float SeeRange, AttackRange;
-    public bool IsPlayerinRange, playerInAttackRange;
-
-    private bool PrintDebugLogs = false;
-    public bool ShowDebugLogs = false;  
-
-    private void Start()
+    //State
+    private enum State
     {
-        Player = GameObject.Find("MainCharackter").transform;
-        if (PrintDebugLogs == true && Player == null) {
+        Roaming,
+        Chasing,
+        HuntPlayer,
+        Attacking,
+    }
+    private State state;
 
-            Debug.Log("Player not found");
-        }
-        else
-        {
-            Debug.Log("Player was Found");
-        }
+    [Header("SpeedVars")]
+    public float LaserSpeed = 2f;
+    public float EnemyVelocity = 0.0f;
+    public float Acceleration = 0.1f;
 
+    [Header("PatroulStats")]
+    public float NegativeRndPosition = -1f;
+    public float PositiveRndPosition = 1f;
+    private bool GoRoaming = false;
 
+    [Header("ActivateAi")]
+    public bool ToggleAi = false;
+    public bool ActivateHuntPlayer = false;
+
+    [Header("PatroulDestinations")]
+    public bool SetDestinationManually = false;
+    [SerializeField]
+    public Transform[] EnemyDestination;
+    public int DestinationIndex;
+
+    [Header("Layers")]
+    public LayerMask PlayerLayer = 1 << 10;
+
+    [Header("Positions")]
+    private Vector3 StartingPosition;
+    public Transform FaceRayOrigin;   
+
+    [Header("Sizes")]
+    public float RayCastSize = 20f;
+    public float SeeRange = 10f;
+    public float ShootRange = 10f;
+    public float MeeleRange = 5f;
+    public float FaceRaySize = 1.0f; // Unused for now
+
+    [Header("Sizes")]
+    public GameObject LaserProjectile;
+    private NavMeshAgent Enemy;
+    public Animator Animator;
+    [SerializeField] Transform EnemyTarget;
+
+    [Header("Animations")]
+    int VelocityHash;
+
+    void Start()
+    {
+        StartingPosition = transform.position;
+        VelocityHash = Animator.StringToHash("Velocity");
+    }
+
+    private void Awake()
+    {
         Enemy = GetComponent<NavMeshAgent>();
-
-        if (PrintDebugLogs == true && Player == null)
-        {
-            Debug.Log("Enemy not found");
-        }
-        else
-        {
-            Debug.Log("Enemy was Found");
-        }
-
+        Animator = GetComponent<Animator>();
     }
-
-    private void Update()
+    void Update()
     {
-        EnemyLogic();
+        ActivateAi();
+        CheckFront();
+        Debug.Log("Animator Controller: " + Animator.runtimeAnimatorController.name);
 
     }
 
-    private void EnemyLogic()
+    private void ActivateAi()
     {
-        IsPlayerinRange = Physics.CheckSphere(transform.position, SeeRange, PlayerLayer);
-        playerInAttackRange = Physics.CheckSphere(transform.position, AttackRange, PlayerLayer);
-
-        if (!IsPlayerinRange && !playerInAttackRange)
+        if (Input.GetKeyUp(KeyCode.Q))
         {
-            Patrolling();
-        }
-        else if (IsPlayerinRange && !playerInAttackRange)
-        {
-            Chasing();
-        }
-        else if (IsPlayerinRange && playerInAttackRange)
-        {
-            AttackPlayer();
+            ToggleAi = !ToggleAi;
+            Debug.Log("Activate Ai : " + ToggleAi);
         }
 
+        if (ToggleAi)
+        {
+            StateMachine();
+
+        }
+        if (!ToggleAi)
+        {
+            Debug.Log("Ai ist Deactivated");
+        }
     }
-
-    private void Patrolling()
+    private void StateMachine()
     {
-        if (PatrolPoints.Length == 0) return;
+        bool PlayerInSight = Physics.CheckSphere(transform.position, SeeRange, PlayerLayer);
+        bool PlayerInAttackRange = Physics.CheckSphere(transform.position, ShootRange, PlayerLayer);
 
-        // Zielpunkt setzen
-        if (!Enemy.pathPending && Enemy.remainingDistance < 10.0f)
+        if (!PlayerInAttackRange && !PlayerInSight)
         {
-            currentPatrolIndex = (currentPatrolIndex + 1) % PatrolPoints.Length;
-            Enemy.SetDestination(PatrolPoints[currentPatrolIndex].position);
+            if (ActivateHuntPlayer && !GoRoaming && ToggleAi)
+            {
+                state = State.HuntPlayer;
+            }
+            else if  (!ActivateHuntPlayer && GoRoaming && ToggleAi)
+            {
+                state = State.Roaming;
+            }
+        }
+
+        if (PlayerInSight && !PlayerInAttackRange)
+        {
+            state = State.Chasing;
+        }
+
+        if (PlayerInSight && PlayerInAttackRange)
+        {
+            state = State.Attacking;
+        }
+
+        switch (state)
+        {
+
+            case State.Roaming:
+
+                Debug.Log("Ai Is Roaming");
+
+                if (SetDestinationManually)
+                {
+                    if (EnemyDestination.Length == 0)
+                    {
+                        Debug.Log("No Destination is Set Change to Randomly Patrouling");
+                        RandomPatrouling();
+                    }
+                    else if (!SetDestinationManually)
+                    {
+                        MoveToNextPatrolPoint();
+                    }
+
+                }
+                else if (!SetDestinationManually && !ActivateHuntPlayer && !GoRoaming)
+                {
+                    RandomPatrouling();
+                }
+                break;
+
+            case State.Chasing:
+                Debug.Log("Chase Player");
+                Chasing();
+                break;
+
+            case State.HuntPlayer:
+                Debug.Log("Chase Player on Map");
+                ChasePlayer();
+                break;
+
+            case State.Attacking:
+                Debug.Log("Attack Player");
+                Attacking();
+                break;
+        }
+        DoAnimations();
+    }
+
+    private void DoAnimations()
+    {
+        float speed = Enemy.velocity.magnitude * EnemyVelocity;  
+        Animator.SetFloat("Velocity", speed);
+
+        if (speed < 0.1f)  
+        {
+            Animator.SetBool("IsIdle", true);
+            Animator.SetBool("IsWalking", false);
+            Animator.SetBool("IsAttacking", false);
+        }
+        else if (state == State.Chasing || state == State.Roaming)
+        {
+            Animator.SetBool("IsIdle", false);
+            Animator.SetBool("IsWalking", true);
+            Animator.SetBool("IsAttacking", false);
+        }
+        else if (state == State.Attacking)
+        {
+            Animator.SetBool("IsIdle", false);
+            Animator.SetBool("IsWalking", false);
+            Animator.SetBool("IsAttacking", true);
         }
     }
 
-    //private void Patrolling()
-    //{
-    //    if (PatrolPoints.Length == 0) return;
-    //
-    //    // Zielpunkt setzen
-    //    if (!Enemy.pathPending && Enemy.remainingDistance < 0.5f)
-    //    {
-    //        currentPatrolIndex = (currentPatrolIndex + 1) % PatrolPoints.Length;
-    //        Enemy.SetDestination(PatrolPoints[currentPatrolIndex].position);
-    //    }
-    //}
+    private void MoveToNextPatrolPoint()
+    {
+        if (Enemy.remainingDistance < 0.2f)
+        {
+            DestinationIndex = (DestinationIndex + 1) % EnemyDestination.Length;
 
-    //private void Patrolling()
-    //{
-    //    if (!WalkPointSet) PatrollingWithSetetPoints();
-    //    if (WalkPointSet) Enemy.SetDestination(WalkPoint);
-    //
-    //    Vector3 distancetowalkpoint = transform.position - WalkPoint;
-    //    if (distancetowalkpoint.magnitude < 1f)
-    //    {
-    //        WalkPointSet = true;
-    //    }
-    //    else
-    //    {
-    //        WalkPointSet = false;
-    //    }
-    //}
+            Vector3 destination = EnemyDestination[DestinationIndex].transform.position;
 
+            Enemy.SetDestination(destination);
+        }
+    }
+    private void RandomPatrouling()
+    {
+        if (Enemy.remainingDistance > Enemy.stoppingDistance) return;
+
+        Vector3 randomPosition = StartingPosition + new Vector3(
+
+            UnityEngine.Random.Range(NegativeRndPosition, PositiveRndPosition),
+            0,
+            UnityEngine.Random.Range(NegativeRndPosition, PositiveRndPosition)
+
+        );
+
+        if (NavMesh.SamplePosition(randomPosition, out NavMeshHit hit, 2.0f, NavMesh.AllAreas))
+        {
+            Enemy.SetDestination(hit.position);
+            Debug.Log("New patrol point: " + hit.position);
+
+        }
+    }
     private void Chasing()
     {
-        Enemy.SetDestination(Player.position);
-    }
-
-    private void AttackPlayer()
-    {
-
-        Enemy.SetDestination(transform.position);
-
-        transform.LookAt(Player);
-
-        if (!HasAttacked)
+        if (!GoRoaming)
         {
-            Rigidbody body = Instantiate(Projectile , transform.position , Quaternion.identity).GetComponent<Rigidbody>();
-            body.AddForce(transform.forward * 32 , ForceMode.Impulse);
-            body.AddForce(transform.up, ForceMode.Impulse);
+            float distance = Vector3.Distance(EnemyTarget.position, Enemy.transform.position);
+            Debug.Log("Enemy is Hunting Player");
+            Debug.Log("Distance between Player and horde is : " + distance);
 
-            HasAttacked = true;
-            Invoke(nameof(ResetAttack), TimeBetweenAttacks);
-        }
-    }
-
-    //private void SearchWalkPoint()
-    //{
-    //    float randomZ = Random.Range(-WalkDistance, WalkDistance);
-    //    float randomX = Random.Range(-WalkDistance, WalkDistance);
-    //
-    //    WalkPoint = new Vector3(transform.position.x + randomX , transform.position.y , transform.position.z + randomZ);
-    //
-    //    if (Physics.Raycast(WalkPoint , -transform.up , 10f , GroundLayer))
-    //    {
-    //        WalkPointSet = true;
-    //    }
-    //}
-
-    private void PatrollingWithSetetPoints()
-    {
-        if (PatrolPoints.Length == 0) return;
-
-        Transform targetPoint = PatrolPoints[currentPatrolIndex];
-        WalkPoint = targetPoint.position;
-        Enemy.SetDestination(WalkPoint);
-        WalkPointSet = true;
-
-        //Debug.Log($"Destination Set to {WalkPoint} WalkPointSet is now {WalkPointSet}");
-
-        Vector3 distanceToTarget = transform.position - targetPoint.position;
-        if (distanceToTarget.magnitude < 1f)
-        {
-            currentPatrolIndex = (currentPatrolIndex + 1) % PatrolPoints.Length;
-            WalkPointSet = false;
-            //Debug.Log($"Walkpoint Set to {WalkPointSet} WalkPointSet is now {WalkPointSet}");
+            Enemy.destination = EnemyTarget.position;
+            transform.LookAt(EnemyTarget.transform.position);
         }
 
     }
 
-    private void ResetAttack()
-    { 
-        HasAttacked = false;
+    private void ChasePlayer()
+    {
+        float targetDistance = Vector3.Distance(Enemy.transform.position, EnemyTarget.transform.position);
+        Debug.Log("Enemy is Chasing Player | Remaining Distance : " + targetDistance);
+        Enemy.SetDestination(EnemyTarget.transform.position);
+    }
+
+    private void Attacking()
+    {
+        Ray ray = new Ray(FaceRayOrigin.transform.position, Enemy.transform.forward);
+        RaycastHit hit;
+
+        if (Physics.Raycast(ray, out hit, RayCastSize))
+        {
+            Debug.DrawRay(ray.origin, ray.direction * RayCastSize, Color.red);
+            Debug.Log("ray hit object : " + hit.collider.gameObject.name);
+
+            if (hit.distance < ShootRange)
+            {
+                if (hit.collider.gameObject.layer == LayerMask.NameToLayer("Player"))
+                    ShootLaser();
+            }
+
+            if (hit.distance < MeeleRange)
+            {
+                MeeleAttack();
+            }
+
+        }
+        else
+        {
+            Debug.DrawRay(ray.origin, ray.direction * RayCastSize, Color.red);
+            Debug.Log("Nothing in Front.");
+        }
+    }
+
+    private void CheckFront()
+    {
+        Ray ray = new Ray(FaceRayOrigin.transform.position, Enemy.transform.forward);
+        RaycastHit hit;
+
+        if (Physics.Raycast(ray, out hit, RayCastSize))
+        {
+            Debug.DrawRay(ray.origin, ray.direction * RayCastSize, Color.red);
+            Debug.Log("ray hit object : " + hit.collider.gameObject.name);
+
+            if (hit.distance < ShootRange)
+            {
+                ShootLaser();
+            }
+
+            if (hit.distance < MeeleRange)
+            {
+                MeeleAttack();
+            }
+        }
+
+        else
+        {
+            Debug.DrawRay(ray.origin, ray.direction * RayCastSize, Color.red);
+            Debug.Log("Nothing in Front.");
+        }
+    }
+    private void ShootLaser()
+    {
+        GameObject laserobj = Instantiate(LaserProjectile, transform.position, Quaternion.identity);
+        Rigidbody rb = LaserProjectile.GetComponent<Rigidbody>();
+        rb.velocity = (EnemyTarget.position - transform.position).normalized * LaserSpeed;
+    }
+
+    private void MeeleAttack()
+    {
+
+    }
+
+    public void OnTriggerEnter(Collider other)
+    {
+        if (other.transform == EnemyTarget)
+        {
+            Debug.Log("Horde Collide with : " + other);
+        }
     }
 
     private void OnDrawGizmosSelected()
     {
         Gizmos.color = Color.red;
-        Gizmos.DrawWireSphere(transform.position, AttackRange);
-        Gizmos.color = Color.yellow;
+        Gizmos.DrawWireSphere(transform.position, ShootRange);
+
+        Gizmos.color = Color.green;
         Gizmos.DrawWireSphere(transform.position, SeeRange);
+
+        Gizmos.color = Color.yellow;
+        Gizmos.DrawWireSphere(transform.position, MeeleRange);
     }
-
-
-
 }
