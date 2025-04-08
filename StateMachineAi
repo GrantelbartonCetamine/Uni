@@ -1,10 +1,9 @@
-using System;
-using System.Collections;
-using System.Collections.Generic;
 using Unity.VisualScripting;
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.AI;
+using UnityEngine.Animations.Rigging;
+using UnityEngine.Events;
 
 public class Behavior : MonoBehaviour
 {
@@ -15,8 +14,27 @@ public class Behavior : MonoBehaviour
         Chasing,
         HuntPlayer,
         Attacking,
+        ShootLaser,
     }
     private State state;
+
+    [Header("ActivateAi")]
+    public bool ToggleAi = false;
+
+    [Header("Decisions")]
+    public bool GoRoaming = false;
+    public bool PatroulRandomly = false; // Working 
+    public bool SetDestinationManually = false;
+    public bool ActivateHuntPlayer = false;
+
+    [Header("WhenInRange")]
+    public bool DoRunJumpAttack = false;           // unused for now
+    public bool DoBackFlipOnWall = false;          // unused for now
+    public bool DoHeroPose = false;                // unused for now
+    public bool BoxPlayerOnGround = false;         // unused for now
+
+    [Header("LetPlayerCry")]
+    public bool CastLaser = false; // EndGoal : https://www.artstation.com/artwork/XBN4ZD or https://www.youtube.com/shorts/0r1qvNr2VpI
 
     [Header("SpeedVars")]
     public float LaserSpeed = 2f;
@@ -24,60 +42,63 @@ public class Behavior : MonoBehaviour
     public float Acceleration = 0.1f;
 
     [Header("PatroulStats")]
-    public float NegativeRndPosition = -1f;
-    public float PositiveRndPosition = 1f;
-    private bool GoRoaming = false;
-
-    [Header("ActivateAi")]
-    public bool ToggleAi = false;
-    public bool ActivateHuntPlayer = false;
+    public float NegativeRndPosition = -10f;
+    public float PositiveRndPosition = 10f;
 
     [Header("PatroulDestinations")]
-    public bool SetDestinationManually = false;
-    [SerializeField]
-    public Transform[] EnemyDestination;
+    [SerializeField] public Transform[] EnemyDestination;
     public int DestinationIndex;
+
+    [Header("Objects")]
+    public GameObject LaserProjectile;
+    private NavMeshAgent Enemy;
+    [SerializeField] Transform EnemyTarget;
 
     [Header("Layers")]
     public LayerMask PlayerLayer = 1 << 10;
 
     [Header("Positions")]
     private Vector3 StartingPosition;
-    public Transform FaceRayOrigin;   
 
     [Header("Sizes")]
     public float RayCastSize = 20f;
     public float SeeRange = 10f;
     public float ShootRange = 10f;
     public float MeeleRange = 5f;
-    public float FaceRaySize = 1.0f; // Unused for now
-
-    [Header("Sizes")]
-    public GameObject LaserProjectile;
-    private NavMeshAgent Enemy;
-    public Animator Animator;
-    [SerializeField] Transform EnemyTarget;
 
     [Header("Animations")]
-    int VelocityHash;
+    public Animator Animator;
+    public float animationCoolDdown = 20f;
+    private float timer = 0;
+    private int animationIndex = -1;
+
+    [Header("LaserComponents")]
+    private RaycastHit LaserHit;
+    [SerializeField] private LineRenderer LaserLineRenderer;
+    [SerializeField] private float LaserDistance = 100f;
+    [SerializeField] private LineRenderer IgnoreMask;
+    [SerializeField] private UnityEvent OneHitTarget;
+    public float FaceRaySize = 1.0f;
+    public Transform FaceRayOrigin;
+    public Transform FaceRayEnd;
+
+    //https://gist.github.com/navarone77/1a67071194263c93c2b718882203cccd
 
     void Start()
     {
         StartingPosition = transform.position;
-        VelocityHash = Animator.StringToHash("Velocity");
+        int VelocityHash = Animator.StringToHash("Velocity");
     }
 
     private void Awake()
     {
         Enemy = GetComponent<NavMeshAgent>();
         Animator = GetComponent<Animator>();
+        LaserLineRenderer.positionCount = 2;
     }
     void Update()
     {
         ActivateAi();
-        CheckFront();
-        Debug.Log("Animator Controller: " + Animator.runtimeAnimatorController.name);
-
     }
 
     private void ActivateAi()
@@ -88,41 +109,46 @@ public class Behavior : MonoBehaviour
             Debug.Log("Activate Ai : " + ToggleAi);
         }
 
-        if (ToggleAi)
+        else if (ToggleAi)
         {
             StateMachine();
 
         }
-        if (!ToggleAi)
+        else if (!ToggleAi)
         {
-            Debug.Log("Ai ist Deactivated");
+            InteruptAll();
         }
+
     }
     private void StateMachine()
     {
-        bool PlayerInSight = Physics.CheckSphere(transform.position, SeeRange, PlayerLayer);
-        bool PlayerInAttackRange = Physics.CheckSphere(transform.position, ShootRange, PlayerLayer);
+        bool playerInSight = Physics.CheckSphere(transform.position, SeeRange, PlayerLayer);
+        bool playerInAttackRange = Physics.CheckSphere(transform.position, ShootRange, PlayerLayer);
 
-        if (!PlayerInAttackRange && !PlayerInSight)
+        if (!playerInAttackRange && !playerInSight && ToggleAi)
         {
-            if (ActivateHuntPlayer && !GoRoaming && ToggleAi)
-            {
-                state = State.HuntPlayer;
-            }
-            else if  (!ActivateHuntPlayer && GoRoaming && ToggleAi)
-            {
-                state = State.Roaming;
-            }
+
+            state = State.Roaming;
         }
 
-        if (PlayerInSight && !PlayerInAttackRange)
+        if (ActivateHuntPlayer && ToggleAi)
+        {
+            state = State.HuntPlayer;
+        }
+            
+        if (playerInSight && !playerInAttackRange && ToggleAi)
         {
             state = State.Chasing;
         }
 
-        if (PlayerInSight && PlayerInAttackRange)
+        if (playerInSight && playerInAttackRange && ToggleAi)
         {
             state = State.Attacking;
+        }
+
+        if (CastLaser && ToggleAi)
+        {
+            state = State.ShootLaser;
         }
 
         switch (state)
@@ -130,25 +156,30 @@ public class Behavior : MonoBehaviour
 
             case State.Roaming:
 
-                Debug.Log("Ai Is Roaming");
-
                 if (SetDestinationManually)
                 {
                     if (EnemyDestination.Length == 0)
                     {
-                        Debug.Log("No Destination is Set Change to Randomly Patrouling");
-                        RandomPatrouling();
+                        ToggleAi = false;
+                        Debug.Log("No PatroulPoints were given Deactivate Ai: " + ToggleAi);
                     }
-                    else if (!SetDestinationManually)
-                    {
-                        MoveToNextPatrolPoint();
-                    }
-
                 }
-                else if (!SetDestinationManually && !ActivateHuntPlayer && !GoRoaming)
+
+                else if (GoRoaming && ToggleAi)
+                {
+                    SetDestination();
+                }
+
+                else if (PatroulRandomly && ToggleAi)
                 {
                     RandomPatrouling();
                 }
+
+                else
+                {
+                    DoAnimations();
+                }
+
                 break;
 
             case State.Chasing:
@@ -158,12 +189,16 @@ public class Behavior : MonoBehaviour
 
             case State.HuntPlayer:
                 Debug.Log("Chase Player on Map");
-                ChasePlayer();
+                HuntPlayer();
                 break;
 
             case State.Attacking:
                 Debug.Log("Attack Player");
                 Attacking();
+                break;
+
+            case State.ShootLaser:
+                ShootLaser();
                 break;
         }
         DoAnimations();
@@ -171,32 +206,74 @@ public class Behavior : MonoBehaviour
 
     private void DoAnimations()
     {
-        float speed = Enemy.velocity.magnitude * EnemyVelocity;  
-        Animator.SetFloat("Velocity", speed);
+        EnemyVelocity = Enemy.velocity.magnitude;
+        Animator.SetFloat("Velocity", EnemyVelocity);
 
-        if (speed < 0.1f)  
+        if (EnemyVelocity < 0.1f)
         {
-            Animator.SetBool("IsIdle", true);
-            Animator.SetBool("IsWalking", false);
-            Animator.SetBool("IsAttacking", false);
+            timer -= Time.deltaTime;
+
+            if (timer >= animationCoolDdown)
+            {
+                animationIndex = Random.Range(0, 3);
+                timer = 0f;
+            }
+
+            animationCoolDdown += Time.deltaTime;
+
+            if (animationIndex == 0)
+            {
+                HandleAnimations(attack: false, idle: false, walking: false, breakDance: true, doFreezeAnimations: false);
+            }
+
+            else if (animationIndex == 1)
+            {
+                HandleAnimations(attack: false, idle: false, walking: false, breakDance: false, doFreezeAnimations: true);
+            }
+
+            else if (animationIndex == 2)
+            {
+                HandleAnimations(attack: false, idle: true, walking: false, breakDance: false, doFreezeAnimations: false);
+            }
+
         }
         else if (state == State.Chasing || state == State.Roaming)
         {
-            Animator.SetBool("IsIdle", false);
-            Animator.SetBool("IsWalking", true);
-            Animator.SetBool("IsAttacking", false);
+            HandleAnimations(attack: false, idle: false, walking: true, breakDance: false, doFreezeAnimations: false);
         }
         else if (state == State.Attacking)
         {
-            Animator.SetBool("IsIdle", false);
-            Animator.SetBool("IsWalking", false);
-            Animator.SetBool("IsAttacking", true);
+            HandleAnimations(attack: true, idle: false, walking: true, breakDance: false, doFreezeAnimations: false);
         }
     }
 
-    private void MoveToNextPatrolPoint()
+    public void HandleAnimations(bool attack, bool idle, bool walking, bool breakDance, bool doFreezeAnimations)
     {
-        if (Enemy.remainingDistance < 0.2f)
+        Animator.SetBool("IsAttacking", attack);
+        Animator.SetBool("IsIdle", idle);
+        Animator.SetBool("IsWalking", walking);
+        Animator.SetBool("DoBreakDance", breakDance);
+        Animator.SetBool("DoFreezeBreakDance", doFreezeAnimations);
+
+    }
+
+    private void InteruptAll()
+    {
+        Debug.Log("Ai ist Deactivated");
+       // Enemy.transform.position = Vector3.zero;  
+    }
+
+    private float GetDistance(Transform destination1 ,  Transform destination2)
+    {
+        return Vector3.Distance(destination1.position, destination2.position);
+    }
+
+    private void SetDestination()
+    {
+        Transform destination2 = EnemyDestination[DestinationIndex];    
+        float distance =  GetDistance(destination1 : Enemy.transform, destination2 : destination2);
+
+        if (distance < 0.2f)
         {
             DestinationIndex = (DestinationIndex + 1) % EnemyDestination.Length;
 
@@ -205,11 +282,12 @@ public class Behavior : MonoBehaviour
             Enemy.SetDestination(destination);
         }
     }
+
     private void RandomPatrouling()
     {
-        if (Enemy.remainingDistance > Enemy.stoppingDistance) return;
-
-        Vector3 randomPosition = StartingPosition + new Vector3(
+        if (Enemy.remainingDistance < 0.1f)
+        {
+            Vector3 randomPosition = StartingPosition + new Vector3(
 
             UnityEngine.Random.Range(NegativeRndPosition, PositiveRndPosition),
             0,
@@ -217,32 +295,29 @@ public class Behavior : MonoBehaviour
 
         );
 
-        if (NavMesh.SamplePosition(randomPosition, out NavMeshHit hit, 2.0f, NavMesh.AllAreas))
-        {
-            Enemy.SetDestination(hit.position);
-            Debug.Log("New patrol point: " + hit.position);
 
+            if (NavMesh.SamplePosition(randomPosition, out NavMeshHit hit, 2.0f, NavMesh.AllAreas))
+            {
+                Enemy.SetDestination(hit.position);
+                Debug.Log("New patrol point: " + hit.position);
+
+            }
         }
     }
     private void Chasing()
     {
-        if (!GoRoaming)
-        {
-            float distance = Vector3.Distance(EnemyTarget.position, Enemy.transform.position);
-            Debug.Log("Enemy is Hunting Player");
-            Debug.Log("Distance between Player and horde is : " + distance);
 
-            Enemy.destination = EnemyTarget.position;
-            transform.LookAt(EnemyTarget.transform.position);
-        }
+        float distance = Vector3.Distance(EnemyTarget.position, Enemy.transform.position);
+        Debug.Log("Distance between Player and horde is : " + distance);
+
+        Enemy.destination = EnemyTarget.position;
+        transform.LookAt(EnemyTarget.transform.position);
 
     }
 
-    private void ChasePlayer()
+    private void HuntPlayer()
     {
-        float targetDistance = Vector3.Distance(Enemy.transform.position, EnemyTarget.transform.position);
-        Debug.Log("Enemy is Chasing Player | Remaining Distance : " + targetDistance);
-        Enemy.SetDestination(EnemyTarget.transform.position);
+        Enemy.SetDestination(EnemyTarget.position);
     }
 
     private void Attacking()
@@ -257,8 +332,8 @@ public class Behavior : MonoBehaviour
 
             if (hit.distance < ShootRange)
             {
-                if (hit.collider.gameObject.layer == LayerMask.NameToLayer("Player"))
-                    ShootLaser();
+                if (LaserHit.collider.gameObject.layer == LayerMask.NameToLayer("Player"))
+                    ShootProjectile();
             }
 
             if (hit.distance < MeeleRange)
@@ -276,17 +351,18 @@ public class Behavior : MonoBehaviour
 
     private void CheckFront()
     {
+
         Ray ray = new Ray(FaceRayOrigin.transform.position, Enemy.transform.forward);
         RaycastHit hit;
 
         if (Physics.Raycast(ray, out hit, RayCastSize))
         {
             Debug.DrawRay(ray.origin, ray.direction * RayCastSize, Color.red);
-            Debug.Log("ray hit object : " + hit.collider.gameObject.name);
+            Debug.Log("ray hit object : " + hit.collider);
 
             if (hit.distance < ShootRange)
             {
-                ShootLaser();
+                ShootProjectile();
             }
 
             if (hit.distance < MeeleRange)
@@ -301,16 +377,40 @@ public class Behavior : MonoBehaviour
             Debug.Log("Nothing in Front.");
         }
     }
-    private void ShootLaser()
+    private void ShootProjectile()
     {
         GameObject laserobj = Instantiate(LaserProjectile, transform.position, Quaternion.identity);
         Rigidbody rb = LaserProjectile.GetComponent<Rigidbody>();
         rb.velocity = (EnemyTarget.position - transform.position).normalized * LaserSpeed;
     }
 
+    private void ShootLaser()
+    {
+        Vector3 laserDdirection = (FaceRayEnd.transform.position - FaceRayOrigin.transform.position).normalized;
+
+        Ray ray = new Ray(FaceRayOrigin.transform.position, laserDdirection);
+        Debug.DrawRay(ray.origin, ray.direction * FaceRaySize, Color.red);
+
+        if (Physics.Raycast(ray, out LaserHit , FaceRaySize))
+        {
+            LaserLineRenderer.SetPosition(0 , FaceRayOrigin.transform.position);
+            LaserLineRenderer.SetPosition(1, LaserHit.collider ? LaserHit.point : FaceRayEnd.transform.position);
+
+            if (LaserHit.collider.gameObject.layer == LayerMask.NameToLayer("Player"))
+            {
+               Debug.Log("Player got hit and looses Life");
+            }
+            else
+            {
+                LaserLineRenderer.SetPosition(0, FaceRayOrigin.position);
+                LaserLineRenderer.SetPosition(1, FaceRayEnd.position);
+            }
+        }
+    }
+
     private void MeeleAttack()
     {
-
+        CheckFront();
     }
 
     public void OnTriggerEnter(Collider other)
